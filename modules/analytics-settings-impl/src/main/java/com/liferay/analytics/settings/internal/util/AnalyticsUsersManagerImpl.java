@@ -15,6 +15,7 @@
 package com.liferay.analytics.settings.internal.util;
 
 import com.liferay.analytics.settings.util.AnalyticsUsersManager;
+import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
@@ -31,8 +32,9 @@ import com.liferay.portal.search.searcher.SearchRequestBuilder;
 import com.liferay.portal.search.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.search.searcher.SearchResponse;
 import com.liferay.portal.search.searcher.Searcher;
-import com.liferay.portal.vulcan.util.TransformUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
@@ -195,7 +197,7 @@ public class AnalyticsUsersManagerImpl implements AnalyticsUsersManager {
 
 		SearchHits searchHits = searchResponse.getSearchHits();
 
-		List<User> users = TransformUtil.transform(
+		List<User> users = _transform(
 			searchHits.getSearchHits(),
 			searchHit -> {
 				Document document = searchHit.getDocument();
@@ -230,6 +232,31 @@ public class AnalyticsUsersManagerImpl implements AnalyticsUsersManager {
 			searchContext.setAttribute(
 				"excludedRoleIds", new long[] {role.getRoleId()});
 		}
+	}
+
+	private <T, R> List<R> _transform(
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction) {
+
+		List<R> list = new ArrayList<>(collection.size());
+
+		for (T item : collection) {
+			try {
+				R newItem = unsafeFunction.apply(item);
+
+				if (newItem != null) {
+					list.add(newItem);
+				}
+			}
+			catch (RuntimeException re) {
+				throw re;
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		return list;
 	}
 
 	@Reference

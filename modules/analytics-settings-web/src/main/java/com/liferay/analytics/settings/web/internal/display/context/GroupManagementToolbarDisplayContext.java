@@ -46,7 +46,7 @@ public class GroupManagementToolbarDisplayContext
 		GroupDisplayContext groupDisplayContext) {
 
 		super(
-			httpServletRequest, liferayPortletRequest, liferayPortletResponse,
+			liferayPortletRequest, liferayPortletResponse, httpServletRequest,
 			groupDisplayContext.getGroupSearch());
 
 		_groupDisplayContext = groupDisplayContext;
