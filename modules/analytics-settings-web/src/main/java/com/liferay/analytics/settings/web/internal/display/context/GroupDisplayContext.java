@@ -22,9 +22,9 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.GroupServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.SetUtil;
@@ -71,8 +71,8 @@ public class GroupDisplayContext {
 				_getGroupParams(), groupSearch.getStart(), groupSearch.getEnd(),
 				new GroupNameComparator(_isOrderByAscending()));
 		}
-		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+		catch (PortalException pe) {
+			_log.error(pe, pe);
 		}
 
 		groupSearch.setResults(groups);
@@ -83,7 +83,7 @@ public class GroupDisplayContext {
 				Validator.isBlank(_analyticsConfiguration.token()),
 				SetUtil.fromArray(_analyticsConfiguration.syncedGroupIds())));
 
-		int total = GroupServiceUtil.searchCount(
+		int total = GroupLocalServiceUtil.searchCount(
 			_getCompanyId(), _getClassNameIds(), _getKeywords(),
 			_getGroupParams());
 
@@ -131,11 +131,12 @@ public class GroupDisplayContext {
 	}
 
 	private LinkedHashMap<String, Object> _getGroupParams() {
-		return LinkedHashMapBuilder.<String, Object>put(
-			"active", Boolean.TRUE
-		).put(
-			"site", Boolean.TRUE
-		).build();
+		LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<>();
+
+		linkedHashMap.put("active", Boolean.TRUE);
+		linkedHashMap.put("site", Boolean.TRUE);
+
+		return linkedHashMap;
 	}
 
 	private String _getKeywords() {
