@@ -16,6 +16,7 @@ package com.liferay.analytics.settings.web.internal.portal.settings.configuratio
 
 import com.liferay.analytics.settings.configuration.AnalyticsConfiguration;
 import com.liferay.analytics.settings.web.internal.constants.AnalyticsSettingsWebKeys;
+import com.liferay.analytics.settings.web.internal.user.AnalyticsUsersManager;
 import com.liferay.configuration.admin.display.ConfigurationScreen;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
@@ -72,8 +73,9 @@ public abstract class BaseAnalyticsConfigurationScreen
 
 			requestDispatcher.include(httpServletRequest, httpServletResponse);
 		}
-		catch (Exception e) {
-			throw new IOException("Unable to render " + getJspPath(), e);
+		catch (Exception exception) {
+			throw new IOException(
+				"Unable to render " + getJspPath(), exception);
 		}
 	}
 
@@ -93,7 +95,14 @@ public abstract class BaseAnalyticsConfigurationScreen
 			AnalyticsSettingsWebKeys.ANALYTICS_CONFIGURATION,
 			configurationProvider.getCompanyConfiguration(
 				AnalyticsConfiguration.class, themeDisplay.getCompanyId()));
+
+		httpServletRequest.setAttribute(
+			AnalyticsSettingsWebKeys.ANALYTICS_USERS_MANAGER,
+			analyticsUsersManager);
 	}
+
+	@Reference
+	protected AnalyticsUsersManager analyticsUsersManager;
 
 	@Reference
 	protected ConfigurationProvider configurationProvider;

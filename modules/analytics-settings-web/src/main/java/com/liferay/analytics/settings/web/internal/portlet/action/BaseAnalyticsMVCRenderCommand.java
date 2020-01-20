@@ -16,6 +16,7 @@ package com.liferay.analytics.settings.web.internal.portlet.action;
 
 import com.liferay.analytics.settings.configuration.AnalyticsConfiguration;
 import com.liferay.analytics.settings.web.internal.constants.AnalyticsSettingsWebKeys;
+import com.liferay.analytics.settings.web.internal.user.AnalyticsUsersManager;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
@@ -57,13 +58,13 @@ public abstract class BaseAnalyticsMVCRenderCommand
 				PortalUtil.getHttpServletRequest(renderRequest),
 				PortalUtil.getHttpServletResponse(renderResponse));
 		}
-		catch (Exception e) {
+		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to include JSP " + getJspPath(), e);
+				_log.warn("Unable to include JSP " + getJspPath(), exception);
 			}
 
 			throw new PortletException(
-				"Unable to include JSP " + getJspPath(), e);
+				"Unable to include JSP " + getJspPath(), exception);
 		}
 
 		return MVCRenderConstants.MVC_PATH_VALUE_SKIP_DISPATCH;
@@ -83,7 +84,14 @@ public abstract class BaseAnalyticsMVCRenderCommand
 			AnalyticsSettingsWebKeys.ANALYTICS_CONFIGURATION,
 			configurationProvider.getCompanyConfiguration(
 				AnalyticsConfiguration.class, themeDisplay.getCompanyId()));
+
+		httpServletRequest.setAttribute(
+			AnalyticsSettingsWebKeys.ANALYTICS_USERS_MANAGER,
+			analyticsUsersManager);
 	}
+
+	@Reference
+	protected AnalyticsUsersManager analyticsUsersManager;
 
 	@Reference
 	protected ConfigurationProvider configurationProvider;

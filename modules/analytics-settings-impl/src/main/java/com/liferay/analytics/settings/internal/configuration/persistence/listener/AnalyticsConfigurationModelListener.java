@@ -21,7 +21,6 @@ import com.liferay.analytics.settings.configuration.AnalyticsConfiguration;
 import com.liferay.analytics.settings.configuration.AnalyticsConfigurationTracker;
 import com.liferay.analytics.settings.internal.security.auth.verifier.AnalyticsSecurityAuthVerifier;
 import com.liferay.analytics.settings.security.constants.AnalyticsSecurityConstants;
-import com.liferay.analytics.settings.util.AnalyticsUsersManager;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListener;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -259,8 +258,8 @@ public class AnalyticsConfigurationModelListener
 			_deleteSAPEntry(companyId);
 			_disableAuthVerifier();
 		}
-		catch (Exception e) {
-			_log.error(e, e);
+		catch (Exception exception) {
+			_log.error(exception, exception);
 		}
 	}
 
@@ -279,8 +278,8 @@ public class AnalyticsConfigurationModelListener
 			_addSAPEntry(companyId);
 			_enableAuthVerifier();
 		}
-		catch (Exception e) {
-			_log.error(e, e);
+		catch (Exception exception) {
+			_log.error(exception, exception);
 		}
 	}
 
@@ -339,7 +338,7 @@ public class AnalyticsConfigurationModelListener
 			return;
 		}
 
-		int count = _analyticsUsersManager.getCompanyUsersCount(companyId);
+		int count = _userLocalService.getCompanyUsersCount(companyId);
 
 		int pages = count / _DEFAULT_DELTA;
 
@@ -352,7 +351,7 @@ public class AnalyticsConfigurationModelListener
 				end = count;
 			}
 
-			List<User> users = _analyticsUsersManager.getCompanyUsers(
+			List<User> users = _userLocalService.getCompanyUsers(
 				companyId, start, end);
 
 			_addAnalyticsMessages(users);
@@ -375,7 +374,7 @@ public class AnalyticsConfigurationModelListener
 
 				groups.add(group);
 			}
-			catch (Exception e) {
+			catch (Exception exception) {
 				if (_log.isInfoEnabled()) {
 					_log.info("Unable to get group " + groupId);
 				}
@@ -405,7 +404,7 @@ public class AnalyticsConfigurationModelListener
 
 				organizations.add(organization);
 			}
-			catch (Exception e) {
+			catch (Exception exception) {
 				if (_log.isInfoEnabled()) {
 					_log.info("Unable to get organization " + organizationId);
 				}
@@ -417,7 +416,7 @@ public class AnalyticsConfigurationModelListener
 		}
 
 		for (String organizationId : organizationIds) {
-			int count = _analyticsUsersManager.getOrganizationUsersCount(
+			int count = _userLocalService.getOrganizationUsersCount(
 				GetterUtil.getLong(organizationId));
 
 			int pages = count / _DEFAULT_DELTA;
@@ -432,14 +431,13 @@ public class AnalyticsConfigurationModelListener
 				}
 
 				try {
-					List<User> users =
-						_analyticsUsersManager.getOrganizationUsers(
-							GetterUtil.getLong(organizationId), start, end);
+					List<User> users = _userLocalService.getOrganizationUsers(
+						GetterUtil.getLong(organizationId), start, end);
 
 					_addAnalyticsMessages(users);
 					_addContactsAnalyticsMessages(users);
 				}
-				catch (Exception e) {
+				catch (Exception exception) {
 					if (_log.isInfoEnabled()) {
 						_log.info(
 							"Unable to get organization users for " +
@@ -466,7 +464,7 @@ public class AnalyticsConfigurationModelListener
 
 				userGroups.add(userGroup);
 			}
-			catch (Exception e) {
+			catch (Exception exception) {
 				if (_log.isInfoEnabled()) {
 					_log.info("Unable to get user group " + userGroupId);
 				}
@@ -478,7 +476,7 @@ public class AnalyticsConfigurationModelListener
 		}
 
 		for (String userGroupId : userGroupIds) {
-			int count = _analyticsUsersManager.getUserGroupUsersCount(
+			int count = _userLocalService.getUserGroupUsersCount(
 				GetterUtil.getLong(userGroupId));
 
 			int pages = count / _DEFAULT_DELTA;
@@ -492,7 +490,7 @@ public class AnalyticsConfigurationModelListener
 					end = count;
 				}
 
-				List<User> users = _analyticsUsersManager.getUserGroupUsers(
+				List<User> users = _userLocalService.getUserGroupUsers(
 					GetterUtil.getLong(userGroupId), start, end);
 
 				_addAnalyticsMessages(users);
@@ -519,9 +517,6 @@ public class AnalyticsConfigurationModelListener
 
 	@Reference
 	private AnalyticsConfigurationTracker _analyticsConfigurationTracker;
-
-	@Reference
-	private AnalyticsUsersManager _analyticsUsersManager;
 
 	private boolean _authVerifierEnabled;
 

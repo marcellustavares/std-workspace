@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.OrganizationConstants;
 import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -132,11 +133,9 @@ public class OrganizationDisplayContext {
 	}
 
 	private LinkedHashMap<String, Object> _getOrganizationParams() {
-		LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<>();
-
-		linkedHashMap.put("active", Boolean.TRUE);
-
-		return linkedHashMap;
+		return LinkedHashMapBuilder.<String, Object>put(
+			"active", Boolean.TRUE
+		).build();
 	}
 
 	private boolean _isOrderByAscending() {

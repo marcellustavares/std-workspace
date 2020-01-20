@@ -58,10 +58,9 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 
 	@Override
 	public void addAnalyticsMessage(
-		boolean checkExclusions, String eventType,
-		List<String> includeAttributeNames, T model) {
+		String eventType, List<String> includeAttributeNames, T model) {
 
-		if (checkExclusions && isExcluded(model)) {
+		if (isExcluded(model)) {
 			return;
 		}
 
@@ -86,7 +85,7 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 				userLocalService.getDefaultUserId(shardedModel.getCompanyId()),
 				analyticsMessageJSON.getBytes(Charset.defaultCharset()));
 		}
-		catch (Exception e) {
+		catch (Exception exception) {
 			if (_log.isInfoEnabled()) {
 				_log.info(
 					"Unable to add analytics message " + jsonObject.toString());
@@ -96,12 +95,12 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 
 	@Override
 	public void onAfterCreate(T model) throws ModelListenerException {
-		addAnalyticsMessage(true, "add", getAttributeNames(), model);
+		addAnalyticsMessage("add", getAttributeNames(), model);
 	}
 
 	@Override
 	public void onBeforeRemove(T model) throws ModelListenerException {
-		addAnalyticsMessage(true, "delete", new ArrayList<>(), model);
+		addAnalyticsMessage("delete", new ArrayList<>(), model);
 	}
 
 	@Override
@@ -114,10 +113,10 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 				return;
 			}
 
-			addAnalyticsMessage(true, "update", getAttributeNames(), model);
+			addAnalyticsMessage("update", getAttributeNames(), model);
 		}
-		catch (Exception e) {
-			throw new ModelListenerException(e);
+		catch (Exception exception) {
+			throw new ModelListenerException(exception);
 		}
 	}
 
@@ -185,7 +184,7 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 			try {
 				companyService.updatePreferences(companyId, unicodeProperties);
 			}
-			catch (Exception e) {
+			catch (Exception exception) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
 						"Unable to update preferences for company ID " +
@@ -201,7 +200,7 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 				AnalyticsConfiguration.class, companyId,
 				configurationProperties);
 		}
-		catch (Exception e) {
+		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
 					"Unable to update configuration for company ID " +

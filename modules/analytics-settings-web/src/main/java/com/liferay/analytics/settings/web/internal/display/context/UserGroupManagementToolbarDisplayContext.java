@@ -46,7 +46,7 @@ public class UserGroupManagementToolbarDisplayContext
 		UserGroupDisplayContext userGroupDisplayContext) {
 
 		super(
-			liferayPortletRequest, liferayPortletResponse, httpServletRequest,
+			httpServletRequest, liferayPortletRequest, liferayPortletResponse,
 			userGroupDisplayContext.getUserGroupSearch());
 
 		ThemeDisplay themeDisplay =

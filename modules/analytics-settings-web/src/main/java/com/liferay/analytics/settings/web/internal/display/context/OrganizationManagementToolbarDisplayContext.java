@@ -46,7 +46,7 @@ public class OrganizationManagementToolbarDisplayContext
 		OrganizationDisplayContext organizationDisplayContext) {
 
 		super(
-			liferayPortletRequest, liferayPortletResponse, httpServletRequest,
+			httpServletRequest, liferayPortletRequest, liferayPortletResponse,
 			organizationDisplayContext.getOrganizationSearch());
 
 		_organizationDisplayContext = organizationDisplayContext;
