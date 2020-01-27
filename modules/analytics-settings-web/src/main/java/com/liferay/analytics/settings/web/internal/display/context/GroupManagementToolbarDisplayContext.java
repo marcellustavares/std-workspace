@@ -91,11 +91,6 @@ public class GroupManagementToolbarDisplayContext
 	}
 
 	@Override
-	protected String[] getDisplayViews() {
-		return new String[] {"list"};
-	}
-
-	@Override
 	protected List<DropdownItem> getDropdownItems(
 		Map<String, String> entriesMap, PortletURL entryURL,
 		String parameterName, String parameterValue) {

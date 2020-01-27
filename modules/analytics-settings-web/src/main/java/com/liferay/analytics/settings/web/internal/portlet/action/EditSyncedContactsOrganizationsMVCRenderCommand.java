@@ -14,7 +14,6 @@
 
 package com.liferay.analytics.settings.web.internal.portlet.action;
 
-import com.liferay.configuration.admin.constants.ConfigurationAdminPortletKeys;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 
 import javax.servlet.ServletContext;
@@ -27,7 +26,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	property = {
-		"javax.portlet.name=" + ConfigurationAdminPortletKeys.INSTANCE_SETTINGS,
+		"javax.portlet.name=com_liferay_configuration_admin_web_portlet_InstanceSettingsPortlet",
 		"mvc.command.name=/analytics_settings/edit_synced_organizations"
 	},
 	service = MVCRenderCommand.class
