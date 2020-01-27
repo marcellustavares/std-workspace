@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * <p>
  * This class is a wrapper for {@link AnalyticsMessage}.
@@ -32,6 +34,7 @@ import java.util.Map;
  * @see AnalyticsMessage
  * @generated
  */
+@ProviderType
 public class AnalyticsMessageWrapper
 	extends BaseModelWrapper<AnalyticsMessage>
 	implements AnalyticsMessage, ModelWrapper<AnalyticsMessage> {

@@ -16,6 +16,8 @@ package com.liferay.analytics.message.storage.model;
 
 import java.sql.Blob;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The Blob model class for lazy loading the body column in AnalyticsMessage.
  *
@@ -23,6 +25,7 @@ import java.sql.Blob;
  * @see AnalyticsMessage
  * @generated
  */
+@ProviderType
 public class AnalyticsMessageBodyBlobModel {
 
 	public AnalyticsMessageBodyBlobModel() {
