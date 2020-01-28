@@ -26,7 +26,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	property = {
-		"javax.portlet.name=com_liferay_configuration_admin_web_portlet_InstanceSettingsPortlet",
+		"javax.portlet.name=com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet",
 		"mvc.command.name=/analytics_settings/edit_synced_contacts_groups"
 	},
 	service = MVCRenderCommand.class

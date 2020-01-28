@@ -41,7 +41,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(
 	property = {
-		"javax.portlet.name=com_liferay_configuration_admin_web_portlet_InstanceSettingsPortlet",
+		"javax.portlet.name=com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet",
 		"mvc.command.name=/analytics/edit_synced_contacts"
 	},
 	service = MVCActionCommand.class
