@@ -19,20 +19,18 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.search.hits.SearchHits;
-import com.liferay.portal.search.searcher.SearchRequest;
-import com.liferay.portal.search.searcher.SearchRequestBuilder;
-import com.liferay.portal.search.searcher.SearchRequestBuilderFactory;
-import com.liferay.portal.search.searcher.SearchResponse;
-import com.liferay.portal.search.searcher.Searcher;
+import com.liferay.portal.search.constants.SearchContextAttributes;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -60,7 +58,7 @@ public class AnalyticsUsersManager {
 							analyticsAdministratorRole.getRoleId(),
 							WorkflowConstants.STATUS_APPROVED);
 				}
-				catch (Exception e) {
+				catch (Exception exception) {
 					if (_log.isDebugEnabled()) {
 						_log.debug(
 							"Unable to get analytics administrators count");
@@ -71,17 +69,13 @@ public class AnalyticsUsersManager {
 			return activeUsersCount - analyticsAdministratorsCount;
 		}
 
-		SearchRequestBuilder searchRequestBuilder = _getSearchRequestBuilder();
+		SearchContext searchContext = _createSearchContext();
 
-		SearchRequest searchRequest = searchRequestBuilder.withSearchContext(
-			searchContext -> {
-				searchContext.setCompanyId(companyId);
+		searchContext.setCompanyId(companyId);
 
-				_populateSearchContext(searchContext);
-			}
-		).build();
+		_populateSearchContext(searchContext);
 
-		return _getUsersCount(searchRequest);
+		return _getUsersCount(searchContext);
 	}
 
 	public int getOrganizationsAndUserGroupsUsersCount(
@@ -98,21 +92,15 @@ public class AnalyticsUsersManager {
 				organizationIds, userGroupIds);
 		}
 
-		SearchRequestBuilder searchRequestBuilder = _getSearchRequestBuilder();
+		SearchContext searchContext = _createSearchContext();
 
-		SearchRequest searchRequest = searchRequestBuilder.withSearchContext(
-			searchContext -> {
-				searchContext.setAttribute(
-					"selectedOrganizationIds", organizationIds);
-				searchContext.setAttribute(
-					"selectedUserGroupIds", userGroupIds);
-				searchContext.setCompanyId(CompanyThreadLocal.getCompanyId());
+		searchContext.setAttribute("selectedOrganizationIds", organizationIds);
+		searchContext.setAttribute("selectedUserGroupIds", userGroupIds);
+		searchContext.setCompanyId(CompanyThreadLocal.getCompanyId());
 
-				_populateSearchContext(searchContext);
-			}
-		).build();
+		_populateSearchContext(searchContext);
 
-		return _getUsersCount(searchRequest);
+		return _getUsersCount(searchContext);
 	}
 
 	public int getOrganizationUsersCount(long organizationId) {
@@ -121,7 +109,7 @@ public class AnalyticsUsersManager {
 				return _userLocalService.getOrganizationUsersCount(
 					organizationId, WorkflowConstants.STATUS_APPROVED);
 			}
-			catch (Exception e) {
+			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
 					_log.debug("Unable to get organization users count");
 				}
@@ -130,19 +118,15 @@ public class AnalyticsUsersManager {
 			}
 		}
 
-		SearchRequestBuilder searchRequestBuilder = _getSearchRequestBuilder();
+		SearchContext searchContext = _createSearchContext();
 
-		SearchRequest searchRequest = searchRequestBuilder.withSearchContext(
-			searchContext -> {
-				searchContext.setAttribute(
-					"selectedOrganizationIds", new long[] {organizationId});
-				searchContext.setCompanyId(CompanyThreadLocal.getCompanyId());
+		searchContext.setAttribute(
+			"selectedOrganizationIds", new long[] {organizationId});
+		searchContext.setCompanyId(CompanyThreadLocal.getCompanyId());
 
-				_populateSearchContext(searchContext);
-			}
-		).build();
+		_populateSearchContext(searchContext);
 
-		return _getUsersCount(searchRequest);
+		return _getUsersCount(searchContext);
 	}
 
 	public int getUserGroupUsersCount(long userGroupId) {
@@ -151,7 +135,7 @@ public class AnalyticsUsersManager {
 				return _userLocalService.getUserGroupUsersCount(
 					userGroupId, WorkflowConstants.STATUS_APPROVED);
 			}
-			catch (Exception e) {
+			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
 					_log.debug("Unable to get user group users count");
 				}
@@ -160,19 +144,29 @@ public class AnalyticsUsersManager {
 			}
 		}
 
-		SearchRequestBuilder searchRequestBuilder = _getSearchRequestBuilder();
+		SearchContext searchContext = _createSearchContext();
 
-		SearchRequest searchRequest = searchRequestBuilder.withSearchContext(
-			searchContext -> {
-				searchContext.setAttribute(
-					"selectedUserGroupIds", new long[] {userGroupId});
-				searchContext.setCompanyId(CompanyThreadLocal.getCompanyId());
+		searchContext.setAttribute(
+			"selectedUserGroupIds", new long[] {userGroupId});
+		searchContext.setCompanyId(CompanyThreadLocal.getCompanyId());
 
-				_populateSearchContext(searchContext);
-			}
-		).build();
+		_populateSearchContext(searchContext);
 
-		return _getUsersCount(searchRequest);
+		return _getUsersCount(searchContext);
+	}
+
+	private SearchContext _createSearchContext() {
+		SearchContext searchContext = new SearchContext();
+
+		searchContext.setAttribute(
+			SearchContextAttributes.ATTRIBUTE_KEY_EMPTY_SEARCH, Boolean.TRUE);
+		searchContext.setEntryClassNames(new String[] {User.class.getName()});
+
+		QueryConfig queryConfig = searchContext.getQueryConfig();
+
+		queryConfig.setHighlightEnabled(false);
+
+		return searchContext;
 	}
 
 	private Role _fetchAnalyticsAdministratorRole() {
@@ -181,27 +175,19 @@ public class AnalyticsUsersManager {
 			RoleConstants.ANALYTICS_ADMINISTRATOR);
 	}
 
-	private SearchRequestBuilder _getSearchRequestBuilder() {
-		SearchRequestBuilder searchRequestBuilder =
-			_searchRequestBuilderFactory.builder();
+	private int _getUsersCount(SearchContext searchContext) {
+		Indexer<?> indexer = IndexerRegistryUtil.nullSafeGetIndexer(User.class);
 
-		return searchRequestBuilder.entryClassNames(
-			User.class.getName()
-		).emptySearchEnabled(
-			true
-		).highlightEnabled(
-			false
-		);
-	}
+		try {
+			Hits hits = indexer.search(searchContext);
 
-	private int _getUsersCount(SearchRequest searchRequest) {
-		SearchResponse searchResponse = _searcher.search(searchRequest);
+			return hits.getLength();
+		}
+		catch (SearchException se) {
+			_log.error(se, se);
 
-		SearchHits searchHits = searchResponse.getSearchHits();
-
-		Long totalHits = Long.valueOf(searchHits.getTotalHits());
-
-		return totalHits.intValue();
+			return 0;
+		}
 	}
 
 	private boolean _isIndexerEnabled() {
@@ -224,12 +210,6 @@ public class AnalyticsUsersManager {
 
 	@Reference
 	private RoleLocalService _roleLocalService;
-
-	@Reference
-	private Searcher _searcher;
-
-	@Reference
-	private SearchRequestBuilderFactory _searchRequestBuilderFactory;
 
 	@Reference
 	private UserLocalService _userLocalService;
