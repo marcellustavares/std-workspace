@@ -14,12 +14,17 @@
 
 package com.liferay.analytics.message.storage.service.persistence;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.analytics.message.storage.exception.NoSuchMessageException;
 import com.liferay.analytics.message.storage.model.AnalyticsMessage;
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
 import com.liferay.portal.kernel.util.OrderByComparator;
 
-import org.osgi.annotation.versioning.ProviderType;
+import java.io.Serializable;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The persistence interface for the analytics message service.
@@ -41,6 +46,9 @@ public interface AnalyticsMessagePersistence
 	 *
 	 * Never modify or reference this interface directly. Always use {@link AnalyticsMessageUtil} to access the analytics message persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this interface.
 	 */
+	@Override
+	public Map<Serializable, AnalyticsMessage> fetchByPrimaryKeys(
+		Set<Serializable> primaryKeys);
 
 	/**
 	 * Returns all the analytics messages where companyId = &#63;.

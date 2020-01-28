@@ -14,6 +14,8 @@
 
 package com.liferay.analytics.message.storage.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.analytics.message.storage.model.AnalyticsMessage;
 import com.liferay.analytics.message.storage.model.AnalyticsMessageBodyBlobModel;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
@@ -35,8 +37,6 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import java.io.Serializable;
 
 import java.util.List;
-
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Provides the local service interface for AnalyticsMessage. Methods of this

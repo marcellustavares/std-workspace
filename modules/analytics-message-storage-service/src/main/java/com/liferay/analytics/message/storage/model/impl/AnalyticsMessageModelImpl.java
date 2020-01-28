@@ -14,13 +14,14 @@
 
 package com.liferay.analytics.message.storage.model.impl;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.analytics.message.storage.model.AnalyticsMessage;
 import com.liferay.analytics.message.storage.model.AnalyticsMessageBodyBlobModel;
 import com.liferay.analytics.message.storage.model.AnalyticsMessageModel;
 import com.liferay.analytics.message.storage.service.AnalyticsMessageLocalServiceUtil;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.CacheModel;
@@ -30,7 +31,9 @@ import com.liferay.portal.kernel.model.impl.BaseModelImpl;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.DateUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.io.Serializable;
 
@@ -47,8 +50,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The base model implementation for the AnalyticsMessage service. Represents a row in the &quot;AnalyticsMessage&quot; database table, with each column mapped to a property of this class.
@@ -109,17 +110,32 @@ public class AnalyticsMessageModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
+	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
+		com.liferay.analytics.message.storage.service.
+				util.ServiceProps.get(
+					"value.object.entity.cache.enabled.com.liferay.analytics.message.storage.model.AnalyticsMessage"),
+		true);
+
+	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
+		com.liferay.analytics.message.storage.service.
+				util.ServiceProps.get(
+					"value.object.finder.cache.enabled.com.liferay.analytics.message.storage.model.AnalyticsMessage"),
+		true);
+
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
+		com.liferay.analytics.message.storage.service.
+				util.ServiceProps.get(
+					"value.object.column.bitmask.enabled.com.liferay.analytics.message.storage.model.AnalyticsMessage"),
+		true);
+
 	public static final long COMPANYID_COLUMN_BITMASK = 1L;
 
 	public static final long CREATEDATE_COLUMN_BITMASK = 2L;
 
-	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
-		_entityCacheEnabled = entityCacheEnabled;
-	}
-
-	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
-		_finderCacheEnabled = finderCacheEnabled;
-	}
+	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
+		com.liferay.analytics.message.storage.service.
+				util.ServiceProps.get(
+					"lock.expiration.time.com.liferay.analytics.message.storage.model.AnalyticsMessage"));
 
 	public AnalyticsMessageModelImpl() {
 	}
@@ -249,41 +265,161 @@ public class AnalyticsMessageModelImpl
 				new LinkedHashMap<String, BiConsumer<AnalyticsMessage, ?>>();
 
 		attributeGetterFunctions.put(
-			"mvccVersion", AnalyticsMessage::getMvccVersion);
+			"mvccVersion",
+			new Function<AnalyticsMessage, Object>() {
+
+				@Override
+				public Object apply(AnalyticsMessage analyticsMessage) {
+					return analyticsMessage.getMvccVersion();
+				}
+
+			});
 		attributeSetterBiConsumers.put(
 			"mvccVersion",
-			(BiConsumer<AnalyticsMessage, Long>)
-				AnalyticsMessage::setMvccVersion);
+			new BiConsumer<AnalyticsMessage, Object>() {
+
+				@Override
+				public void accept(
+					AnalyticsMessage analyticsMessage, Object mvccVersion) {
+
+					analyticsMessage.setMvccVersion((Long)mvccVersion);
+				}
+
+			});
 		attributeGetterFunctions.put(
-			"analyticsMessageId", AnalyticsMessage::getAnalyticsMessageId);
+			"analyticsMessageId",
+			new Function<AnalyticsMessage, Object>() {
+
+				@Override
+				public Object apply(AnalyticsMessage analyticsMessage) {
+					return analyticsMessage.getAnalyticsMessageId();
+				}
+
+			});
 		attributeSetterBiConsumers.put(
 			"analyticsMessageId",
-			(BiConsumer<AnalyticsMessage, Long>)
-				AnalyticsMessage::setAnalyticsMessageId);
+			new BiConsumer<AnalyticsMessage, Object>() {
+
+				@Override
+				public void accept(
+					AnalyticsMessage analyticsMessage,
+					Object analyticsMessageId) {
+
+					analyticsMessage.setAnalyticsMessageId(
+						(Long)analyticsMessageId);
+				}
+
+			});
 		attributeGetterFunctions.put(
-			"companyId", AnalyticsMessage::getCompanyId);
+			"companyId",
+			new Function<AnalyticsMessage, Object>() {
+
+				@Override
+				public Object apply(AnalyticsMessage analyticsMessage) {
+					return analyticsMessage.getCompanyId();
+				}
+
+			});
 		attributeSetterBiConsumers.put(
 			"companyId",
-			(BiConsumer<AnalyticsMessage, Long>)AnalyticsMessage::setCompanyId);
-		attributeGetterFunctions.put("userId", AnalyticsMessage::getUserId);
+			new BiConsumer<AnalyticsMessage, Object>() {
+
+				@Override
+				public void accept(
+					AnalyticsMessage analyticsMessage, Object companyId) {
+
+					analyticsMessage.setCompanyId((Long)companyId);
+				}
+
+			});
+		attributeGetterFunctions.put(
+			"userId",
+			new Function<AnalyticsMessage, Object>() {
+
+				@Override
+				public Object apply(AnalyticsMessage analyticsMessage) {
+					return analyticsMessage.getUserId();
+				}
+
+			});
 		attributeSetterBiConsumers.put(
 			"userId",
-			(BiConsumer<AnalyticsMessage, Long>)AnalyticsMessage::setUserId);
-		attributeGetterFunctions.put("userName", AnalyticsMessage::getUserName);
+			new BiConsumer<AnalyticsMessage, Object>() {
+
+				@Override
+				public void accept(
+					AnalyticsMessage analyticsMessage, Object userId) {
+
+					analyticsMessage.setUserId((Long)userId);
+				}
+
+			});
+		attributeGetterFunctions.put(
+			"userName",
+			new Function<AnalyticsMessage, Object>() {
+
+				@Override
+				public Object apply(AnalyticsMessage analyticsMessage) {
+					return analyticsMessage.getUserName();
+				}
+
+			});
 		attributeSetterBiConsumers.put(
 			"userName",
-			(BiConsumer<AnalyticsMessage, String>)
-				AnalyticsMessage::setUserName);
+			new BiConsumer<AnalyticsMessage, Object>() {
+
+				@Override
+				public void accept(
+					AnalyticsMessage analyticsMessage, Object userName) {
+
+					analyticsMessage.setUserName((String)userName);
+				}
+
+			});
 		attributeGetterFunctions.put(
-			"createDate", AnalyticsMessage::getCreateDate);
+			"createDate",
+			new Function<AnalyticsMessage, Object>() {
+
+				@Override
+				public Object apply(AnalyticsMessage analyticsMessage) {
+					return analyticsMessage.getCreateDate();
+				}
+
+			});
 		attributeSetterBiConsumers.put(
 			"createDate",
-			(BiConsumer<AnalyticsMessage, Date>)
-				AnalyticsMessage::setCreateDate);
-		attributeGetterFunctions.put("body", AnalyticsMessage::getBody);
+			new BiConsumer<AnalyticsMessage, Object>() {
+
+				@Override
+				public void accept(
+					AnalyticsMessage analyticsMessage, Object createDate) {
+
+					analyticsMessage.setCreateDate((Date)createDate);
+				}
+
+			});
+		attributeGetterFunctions.put(
+			"body",
+			new Function<AnalyticsMessage, Object>() {
+
+				@Override
+				public Object apply(AnalyticsMessage analyticsMessage) {
+					return analyticsMessage.getBody();
+				}
+
+			});
 		attributeSetterBiConsumers.put(
 			"body",
-			(BiConsumer<AnalyticsMessage, Blob>)AnalyticsMessage::setBody);
+			new BiConsumer<AnalyticsMessage, Object>() {
+
+				@Override
+				public void accept(
+					AnalyticsMessage analyticsMessage, Object body) {
+
+					analyticsMessage.setBody((Blob)body);
+				}
+
+			});
 
 		_attributeGetterFunctions = Collections.unmodifiableMap(
 			attributeGetterFunctions);
@@ -511,12 +647,12 @@ public class AnalyticsMessageModelImpl
 
 	@Override
 	public boolean isEntityCacheEnabled() {
-		return _entityCacheEnabled;
+		return ENTITY_CACHE_ENABLED;
 	}
 
 	@Override
 	public boolean isFinderCacheEnabled() {
-		return _finderCacheEnabled;
+		return FINDER_CACHE_ENABLED;
 	}
 
 	@Override
@@ -631,9 +767,6 @@ public class AnalyticsMessageModelImpl
 			_escapedModelProxyProviderFunction = _getProxyProviderFunction();
 
 	}
-
-	private static boolean _entityCacheEnabled;
-	private static boolean _finderCacheEnabled;
 
 	private long _mvccVersion;
 	private long _analyticsMessageId;

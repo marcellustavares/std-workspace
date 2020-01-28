@@ -14,6 +14,8 @@
 
 package com.liferay.analytics.message.storage.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.io.Serializable;
 
 import java.sql.Blob;
@@ -21,8 +23,6 @@ import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This class is used by SOAP remote services.

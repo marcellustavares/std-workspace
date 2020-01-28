@@ -14,9 +14,9 @@
 
 package com.liferay.analytics.message.storage.model;
 
-import java.sql.Blob;
+import aQute.bnd.annotation.ProviderType;
 
-import org.osgi.annotation.versioning.ProviderType;
+import java.sql.Blob;
 
 /**
  * The Blob model class for lazy loading the body column in AnalyticsMessage.

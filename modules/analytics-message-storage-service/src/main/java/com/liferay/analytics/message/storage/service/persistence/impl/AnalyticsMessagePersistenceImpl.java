@@ -14,14 +14,13 @@
 
 package com.liferay.analytics.message.storage.service.persistence.impl;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.analytics.message.storage.exception.NoSuchMessageException;
 import com.liferay.analytics.message.storage.model.AnalyticsMessage;
 import com.liferay.analytics.message.storage.model.impl.AnalyticsMessageImpl;
 import com.liferay.analytics.message.storage.model.impl.AnalyticsMessageModelImpl;
 import com.liferay.analytics.message.storage.service.persistence.AnalyticsMessagePersistence;
-import com.liferay.analytics.message.storage.service.persistence.impl.constants.AnalyticsPersistenceConstants;
-import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
@@ -29,30 +28,26 @@ import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
-import com.liferay.portal.kernel.dao.orm.SessionFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ProxyUtil;
+import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
 
 import java.lang.reflect.InvocationHandler;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.sql.DataSource;
-
-import org.osgi.annotation.versioning.ProviderType;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
+import java.util.Set;
 
 /**
  * The persistence implementation for the analytics message service.
@@ -64,7 +59,6 @@ import org.osgi.service.component.annotations.Reference;
  * @author Brian Wing Shun Chan
  * @generated
  */
-@Component(service = AnalyticsMessagePersistence.class)
 @ProviderType
 public class AnalyticsMessagePersistenceImpl
 	extends BasePersistenceImpl<AnalyticsMessage>
@@ -601,9 +595,6 @@ public class AnalyticsMessagePersistenceImpl
 
 	public AnalyticsMessagePersistenceImpl() {
 		setModelClass(AnalyticsMessage.class);
-
-		setModelImplClass(AnalyticsMessageImpl.class);
-		setModelPKClass(long.class);
 	}
 
 	/**
@@ -614,8 +605,9 @@ public class AnalyticsMessagePersistenceImpl
 	@Override
 	public void cacheResult(AnalyticsMessage analyticsMessage) {
 		entityCache.putResult(
-			entityCacheEnabled, AnalyticsMessageImpl.class,
-			analyticsMessage.getPrimaryKey(), analyticsMessage);
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageImpl.class, analyticsMessage.getPrimaryKey(),
+			analyticsMessage);
 
 		analyticsMessage.resetOriginalValues();
 	}
@@ -629,7 +621,8 @@ public class AnalyticsMessagePersistenceImpl
 	public void cacheResult(List<AnalyticsMessage> analyticsMessages) {
 		for (AnalyticsMessage analyticsMessage : analyticsMessages) {
 			if (entityCache.getResult(
-					entityCacheEnabled, AnalyticsMessageImpl.class,
+					AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+					AnalyticsMessageImpl.class,
 					analyticsMessage.getPrimaryKey()) == null) {
 
 				cacheResult(analyticsMessage);
@@ -666,8 +659,8 @@ public class AnalyticsMessagePersistenceImpl
 	@Override
 	public void clearCache(AnalyticsMessage analyticsMessage) {
 		entityCache.removeResult(
-			entityCacheEnabled, AnalyticsMessageImpl.class,
-			analyticsMessage.getPrimaryKey());
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageImpl.class, analyticsMessage.getPrimaryKey());
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
@@ -680,8 +673,8 @@ public class AnalyticsMessagePersistenceImpl
 
 		for (AnalyticsMessage analyticsMessage : analyticsMessages) {
 			entityCache.removeResult(
-				entityCacheEnabled, AnalyticsMessageImpl.class,
-				analyticsMessage.getPrimaryKey());
+				AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+				AnalyticsMessageImpl.class, analyticsMessage.getPrimaryKey());
 		}
 	}
 
@@ -840,7 +833,7 @@ public class AnalyticsMessagePersistenceImpl
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (!_columnBitmaskEnabled) {
+		if (!AnalyticsMessageModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 		}
 		else if (isNew) {
@@ -878,8 +871,9 @@ public class AnalyticsMessagePersistenceImpl
 		}
 
 		entityCache.putResult(
-			entityCacheEnabled, AnalyticsMessageImpl.class,
-			analyticsMessage.getPrimaryKey(), analyticsMessage, false);
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageImpl.class, analyticsMessage.getPrimaryKey(),
+			analyticsMessage, false);
 
 		analyticsMessage.resetOriginalValues();
 
@@ -928,12 +922,163 @@ public class AnalyticsMessagePersistenceImpl
 	/**
 	 * Returns the analytics message with the primary key or returns <code>null</code> if it could not be found.
 	 *
+	 * @param primaryKey the primary key of the analytics message
+	 * @return the analytics message, or <code>null</code> if a analytics message with the primary key could not be found
+	 */
+	@Override
+	public AnalyticsMessage fetchByPrimaryKey(Serializable primaryKey) {
+		Serializable serializable = entityCache.getResult(
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageImpl.class, primaryKey);
+
+		if (serializable == nullModel) {
+			return null;
+		}
+
+		AnalyticsMessage analyticsMessage = (AnalyticsMessage)serializable;
+
+		if (analyticsMessage == null) {
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				analyticsMessage = (AnalyticsMessage)session.get(
+					AnalyticsMessageImpl.class, primaryKey);
+
+				if (analyticsMessage != null) {
+					cacheResult(analyticsMessage);
+				}
+				else {
+					entityCache.putResult(
+						AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+						AnalyticsMessageImpl.class, primaryKey, nullModel);
+				}
+			}
+			catch (Exception e) {
+				entityCache.removeResult(
+					AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+					AnalyticsMessageImpl.class, primaryKey);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return analyticsMessage;
+	}
+
+	/**
+	 * Returns the analytics message with the primary key or returns <code>null</code> if it could not be found.
+	 *
 	 * @param analyticsMessageId the primary key of the analytics message
 	 * @return the analytics message, or <code>null</code> if a analytics message with the primary key could not be found
 	 */
 	@Override
 	public AnalyticsMessage fetchByPrimaryKey(long analyticsMessageId) {
 		return fetchByPrimaryKey((Serializable)analyticsMessageId);
+	}
+
+	@Override
+	public Map<Serializable, AnalyticsMessage> fetchByPrimaryKeys(
+		Set<Serializable> primaryKeys) {
+
+		if (primaryKeys.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		Map<Serializable, AnalyticsMessage> map =
+			new HashMap<Serializable, AnalyticsMessage>();
+
+		if (primaryKeys.size() == 1) {
+			Iterator<Serializable> iterator = primaryKeys.iterator();
+
+			Serializable primaryKey = iterator.next();
+
+			AnalyticsMessage analyticsMessage = fetchByPrimaryKey(primaryKey);
+
+			if (analyticsMessage != null) {
+				map.put(primaryKey, analyticsMessage);
+			}
+
+			return map;
+		}
+
+		Set<Serializable> uncachedPrimaryKeys = null;
+
+		for (Serializable primaryKey : primaryKeys) {
+			Serializable serializable = entityCache.getResult(
+				AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+				AnalyticsMessageImpl.class, primaryKey);
+
+			if (serializable != nullModel) {
+				if (serializable == null) {
+					if (uncachedPrimaryKeys == null) {
+						uncachedPrimaryKeys = new HashSet<Serializable>();
+					}
+
+					uncachedPrimaryKeys.add(primaryKey);
+				}
+				else {
+					map.put(primaryKey, (AnalyticsMessage)serializable);
+				}
+			}
+		}
+
+		if (uncachedPrimaryKeys == null) {
+			return map;
+		}
+
+		StringBundler query = new StringBundler(
+			uncachedPrimaryKeys.size() * 2 + 1);
+
+		query.append(_SQL_SELECT_ANALYTICSMESSAGE_WHERE_PKS_IN);
+
+		for (Serializable primaryKey : uncachedPrimaryKeys) {
+			query.append((long)primaryKey);
+
+			query.append(",");
+		}
+
+		query.setIndex(query.index() - 1);
+
+		query.append(")");
+
+		String sql = query.toString();
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			Query q = session.createQuery(sql);
+
+			for (AnalyticsMessage analyticsMessage :
+					(List<AnalyticsMessage>)q.list()) {
+
+				map.put(analyticsMessage.getPrimaryKeyObj(), analyticsMessage);
+
+				cacheResult(analyticsMessage);
+
+				uncachedPrimaryKeys.remove(analyticsMessage.getPrimaryKeyObj());
+			}
+
+			for (Serializable primaryKey : uncachedPrimaryKeys) {
+				entityCache.putResult(
+					AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+					AnalyticsMessageImpl.class, primaryKey, nullModel);
+			}
+		}
+		catch (Exception e) {
+			throw processException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+
+		return map;
 	}
 
 	/**
@@ -1132,21 +1277,6 @@ public class AnalyticsMessagePersistenceImpl
 	}
 
 	@Override
-	protected EntityCache getEntityCache() {
-		return entityCache;
-	}
-
-	@Override
-	protected String getPKDBName() {
-		return "analyticsMessageId";
-	}
-
-	@Override
-	protected String getSelectSQL() {
-		return _SQL_SELECT_ANALYTICSMESSAGE;
-	}
-
-	@Override
 	protected Map<String, Integer> getTableColumnsMap() {
 		return AnalyticsMessageModelImpl.TABLE_COLUMNS_MAP;
 	}
@@ -1154,96 +1284,70 @@ public class AnalyticsMessagePersistenceImpl
 	/**
 	 * Initializes the analytics message persistence.
 	 */
-	@Activate
-	public void activate() {
-		AnalyticsMessageModelImpl.setEntityCacheEnabled(entityCacheEnabled);
-		AnalyticsMessageModelImpl.setFinderCacheEnabled(finderCacheEnabled);
-
+	public void afterPropertiesSet() {
 		_finderPathWithPaginationFindAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, AnalyticsMessageImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageModelImpl.FINDER_CACHE_ENABLED,
+			AnalyticsMessageImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findAll", new String[0]);
 
 		_finderPathWithoutPaginationFindAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, AnalyticsMessageImpl.class,
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageModelImpl.FINDER_CACHE_ENABLED,
+			AnalyticsMessageImpl.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
 			new String[0]);
 
 		_finderPathCountAll = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
 			new String[0]);
 
 		_finderPathWithPaginationFindByCompanyId = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, AnalyticsMessageImpl.class,
-			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCompanyId",
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageModelImpl.FINDER_CACHE_ENABLED,
+			AnalyticsMessageImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findByCompanyId",
 			new String[] {
 				Long.class.getName(), Integer.class.getName(),
 				Integer.class.getName(), OrderByComparator.class.getName()
 			});
 
 		_finderPathWithoutPaginationFindByCompanyId = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, AnalyticsMessageImpl.class,
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageModelImpl.FINDER_CACHE_ENABLED,
+			AnalyticsMessageImpl.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByCompanyId",
 			new String[] {Long.class.getName()},
 			AnalyticsMessageModelImpl.COMPANYID_COLUMN_BITMASK |
 			AnalyticsMessageModelImpl.CREATEDATE_COLUMN_BITMASK);
 
 		_finderPathCountByCompanyId = new FinderPath(
-			entityCacheEnabled, finderCacheEnabled, Long.class,
+			AnalyticsMessageModelImpl.ENTITY_CACHE_ENABLED,
+			AnalyticsMessageModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByCompanyId",
 			new String[] {Long.class.getName()});
 	}
 
-	@Deactivate
-	public void deactivate() {
+	public void destroy() {
 		entityCache.removeCache(AnalyticsMessageImpl.class.getName());
 		finderCache.removeCache(FINDER_CLASS_NAME_ENTITY);
 		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
-	@Override
-	@Reference(
-		target = AnalyticsPersistenceConstants.ORIGIN_BUNDLE_SYMBOLIC_NAME_FILTER,
-		unbind = "-"
-	)
-	public void setConfiguration(Configuration configuration) {
-		super.setConfiguration(configuration);
-
-		_columnBitmaskEnabled = GetterUtil.getBoolean(
-			configuration.get(
-				"value.object.column.bitmask.enabled.com.liferay.analytics.message.storage.model.AnalyticsMessage"),
-			true);
-	}
-
-	@Override
-	@Reference(
-		target = AnalyticsPersistenceConstants.ORIGIN_BUNDLE_SYMBOLIC_NAME_FILTER,
-		unbind = "-"
-	)
-	public void setDataSource(DataSource dataSource) {
-		super.setDataSource(dataSource);
-	}
-
-	@Override
-	@Reference(
-		target = AnalyticsPersistenceConstants.ORIGIN_BUNDLE_SYMBOLIC_NAME_FILTER,
-		unbind = "-"
-	)
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		super.setSessionFactory(sessionFactory);
-	}
-
-	private boolean _columnBitmaskEnabled;
-
-	@Reference
+	@ServiceReference(type = EntityCache.class)
 	protected EntityCache entityCache;
 
-	@Reference
+	@ServiceReference(type = FinderCache.class)
 	protected FinderCache finderCache;
 
 	private static final String _SQL_SELECT_ANALYTICSMESSAGE =
 		"SELECT analyticsMessage FROM AnalyticsMessage analyticsMessage";
+
+	private static final String _SQL_SELECT_ANALYTICSMESSAGE_WHERE_PKS_IN =
+		"SELECT analyticsMessage FROM AnalyticsMessage analyticsMessage WHERE analyticsMessageId IN (";
 
 	private static final String _SQL_SELECT_ANALYTICSMESSAGE_WHERE =
 		"SELECT analyticsMessage FROM AnalyticsMessage analyticsMessage WHERE ";
@@ -1264,14 +1368,5 @@ public class AnalyticsMessagePersistenceImpl
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		AnalyticsMessagePersistenceImpl.class);
-
-	static {
-		try {
-			Class.forName(AnalyticsPersistenceConstants.class.getName());
-		}
-		catch (ClassNotFoundException cnfe) {
-			throw new ExceptionInInitializerError(cnfe);
-		}
-	}
 
 }
