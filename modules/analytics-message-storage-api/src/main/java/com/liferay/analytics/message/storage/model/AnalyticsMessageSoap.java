@@ -14,6 +14,8 @@
 
 package com.liferay.analytics.message.storage.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.io.Serializable;
 
 import java.sql.Blob;
@@ -28,6 +30,7 @@ import java.util.List;
  * @author Brian Wing Shun Chan
  * @generated
  */
+@ProviderType
 public class AnalyticsMessageSoap implements Serializable {
 
 	public static AnalyticsMessageSoap toSoapModel(AnalyticsMessage model) {

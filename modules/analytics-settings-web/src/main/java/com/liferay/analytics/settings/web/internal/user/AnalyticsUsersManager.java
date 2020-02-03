@@ -183,8 +183,8 @@ public class AnalyticsUsersManager {
 
 			return hits.getLength();
 		}
-		catch (SearchException searchException) {
-			_log.error(searchException, searchException);
+		catch (SearchException se) {
+			_log.error(se, se);
 
 			return 0;
 		}

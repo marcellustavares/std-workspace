@@ -14,14 +14,20 @@
 
 package com.liferay.analytics.message.storage.model;
 
+import aQute.bnd.annotation.ProviderType;
+
+import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.portal.kernel.model.ModelWrapper;
-import com.liferay.portal.kernel.model.wrapper.BaseModelWrapper;
+import com.liferay.portal.kernel.service.ServiceContext;
+
+import java.io.Serializable;
 
 import java.sql.Blob;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -32,12 +38,22 @@ import java.util.Map;
  * @see AnalyticsMessage
  * @generated
  */
+@ProviderType
 public class AnalyticsMessageWrapper
-	extends BaseModelWrapper<AnalyticsMessage>
 	implements AnalyticsMessage, ModelWrapper<AnalyticsMessage> {
 
 	public AnalyticsMessageWrapper(AnalyticsMessage analyticsMessage) {
-		super(analyticsMessage);
+		_analyticsMessage = analyticsMessage;
+	}
+
+	@Override
+	public Class<?> getModelClass() {
+		return AnalyticsMessage.class;
+	}
+
+	@Override
+	public String getModelClassName() {
+		return AnalyticsMessage.class.getName();
 	}
 
 	@Override
@@ -100,6 +116,17 @@ public class AnalyticsMessageWrapper
 		}
 	}
 
+	@Override
+	public Object clone() {
+		return new AnalyticsMessageWrapper(
+			(AnalyticsMessage)_analyticsMessage.clone());
+	}
+
+	@Override
+	public int compareTo(AnalyticsMessage analyticsMessage) {
+		return _analyticsMessage.compareTo(analyticsMessage);
+	}
+
 	/**
 	 * Returns the analytics message ID of this analytics message.
 	 *
@@ -107,7 +134,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public long getAnalyticsMessageId() {
-		return model.getAnalyticsMessageId();
+		return _analyticsMessage.getAnalyticsMessageId();
 	}
 
 	/**
@@ -117,7 +144,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public Blob getBody() {
-		return model.getBody();
+		return _analyticsMessage.getBody();
 	}
 
 	/**
@@ -127,7 +154,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public long getCompanyId() {
-		return model.getCompanyId();
+		return _analyticsMessage.getCompanyId();
 	}
 
 	/**
@@ -137,7 +164,12 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public Date getCreateDate() {
-		return model.getCreateDate();
+		return _analyticsMessage.getCreateDate();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _analyticsMessage.getExpandoBridge();
 	}
 
 	/**
@@ -147,7 +179,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public long getMvccVersion() {
-		return model.getMvccVersion();
+		return _analyticsMessage.getMvccVersion();
 	}
 
 	/**
@@ -157,7 +189,12 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public long getPrimaryKey() {
-		return model.getPrimaryKey();
+		return _analyticsMessage.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _analyticsMessage.getPrimaryKeyObj();
 	}
 
 	/**
@@ -167,7 +204,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public long getUserId() {
-		return model.getUserId();
+		return _analyticsMessage.getUserId();
 	}
 
 	/**
@@ -177,7 +214,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public String getUserName() {
-		return model.getUserName();
+		return _analyticsMessage.getUserName();
 	}
 
 	/**
@@ -187,12 +224,32 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public String getUserUuid() {
-		return model.getUserUuid();
+		return _analyticsMessage.getUserUuid();
+	}
+
+	@Override
+	public int hashCode() {
+		return _analyticsMessage.hashCode();
+	}
+
+	@Override
+	public boolean isCachedModel() {
+		return _analyticsMessage.isCachedModel();
+	}
+
+	@Override
+	public boolean isEscapedModel() {
+		return _analyticsMessage.isEscapedModel();
+	}
+
+	@Override
+	public boolean isNew() {
+		return _analyticsMessage.isNew();
 	}
 
 	@Override
 	public void persist() {
-		model.persist();
+		_analyticsMessage.persist();
 	}
 
 	/**
@@ -202,7 +259,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setAnalyticsMessageId(long analyticsMessageId) {
-		model.setAnalyticsMessageId(analyticsMessageId);
+		_analyticsMessage.setAnalyticsMessageId(analyticsMessageId);
 	}
 
 	/**
@@ -212,7 +269,12 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setBody(Blob body) {
-		model.setBody(body);
+		_analyticsMessage.setBody(body);
+	}
+
+	@Override
+	public void setCachedModel(boolean cachedModel) {
+		_analyticsMessage.setCachedModel(cachedModel);
 	}
 
 	/**
@@ -222,7 +284,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setCompanyId(long companyId) {
-		model.setCompanyId(companyId);
+		_analyticsMessage.setCompanyId(companyId);
 	}
 
 	/**
@@ -232,7 +294,24 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setCreateDate(Date createDate) {
-		model.setCreateDate(createDate);
+		_analyticsMessage.setCreateDate(createDate);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(
+		com.liferay.portal.kernel.model.BaseModel<?> baseModel) {
+
+		_analyticsMessage.setExpandoBridgeAttributes(baseModel);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_analyticsMessage.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(ServiceContext serviceContext) {
+		_analyticsMessage.setExpandoBridgeAttributes(serviceContext);
 	}
 
 	/**
@@ -242,7 +321,12 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setMvccVersion(long mvccVersion) {
-		model.setMvccVersion(mvccVersion);
+		_analyticsMessage.setMvccVersion(mvccVersion);
+	}
+
+	@Override
+	public void setNew(boolean n) {
+		_analyticsMessage.setNew(n);
 	}
 
 	/**
@@ -252,7 +336,12 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setPrimaryKey(long primaryKey) {
-		model.setPrimaryKey(primaryKey);
+		_analyticsMessage.setPrimaryKey(primaryKey);
+	}
+
+	@Override
+	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
+		_analyticsMessage.setPrimaryKeyObj(primaryKeyObj);
 	}
 
 	/**
@@ -262,7 +351,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setUserId(long userId) {
-		model.setUserId(userId);
+		_analyticsMessage.setUserId(userId);
 	}
 
 	/**
@@ -272,7 +361,7 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setUserName(String userName) {
-		model.setUserName(userName);
+		_analyticsMessage.setUserName(userName);
 	}
 
 	/**
@@ -282,12 +371,79 @@ public class AnalyticsMessageWrapper
 	 */
 	@Override
 	public void setUserUuid(String userUuid) {
-		model.setUserUuid(userUuid);
+		_analyticsMessage.setUserUuid(userUuid);
 	}
 
 	@Override
-	protected AnalyticsMessageWrapper wrap(AnalyticsMessage analyticsMessage) {
-		return new AnalyticsMessageWrapper(analyticsMessage);
+	public com.liferay.portal.kernel.model.CacheModel<AnalyticsMessage>
+		toCacheModel() {
+
+		return _analyticsMessage.toCacheModel();
 	}
+
+	@Override
+	public AnalyticsMessage toEscapedModel() {
+		return new AnalyticsMessageWrapper(_analyticsMessage.toEscapedModel());
+	}
+
+	@Override
+	public String toString() {
+		return _analyticsMessage.toString();
+	}
+
+	@Override
+	public AnalyticsMessage toUnescapedModel() {
+		return new AnalyticsMessageWrapper(
+			_analyticsMessage.toUnescapedModel());
+	}
+
+	@Override
+	public String toXmlString() {
+		return _analyticsMessage.toXmlString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof AnalyticsMessageWrapper)) {
+			return false;
+		}
+
+		AnalyticsMessageWrapper analyticsMessageWrapper =
+			(AnalyticsMessageWrapper)obj;
+
+		if (Objects.equals(
+				_analyticsMessage, analyticsMessageWrapper._analyticsMessage)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public AnalyticsMessage getWrappedModel() {
+		return _analyticsMessage;
+	}
+
+	@Override
+	public boolean isEntityCacheEnabled() {
+		return _analyticsMessage.isEntityCacheEnabled();
+	}
+
+	@Override
+	public boolean isFinderCacheEnabled() {
+		return _analyticsMessage.isFinderCacheEnabled();
+	}
+
+	@Override
+	public void resetOriginalValues() {
+		_analyticsMessage.resetOriginalValues();
+	}
+
+	private final AnalyticsMessage _analyticsMessage;
 
 }
