@@ -14,8 +14,6 @@
 
 package com.liferay.analytics.message.storage.model;
 
-import aQute.bnd.annotation.ProviderType;
-
 import java.sql.Blob;
 
 /**
@@ -25,7 +23,6 @@ import java.sql.Blob;
  * @see AnalyticsMessage
  * @generated
  */
-@ProviderType
 public class AnalyticsMessageBodyBlobModel {
 
 	public AnalyticsMessageBodyBlobModel() {

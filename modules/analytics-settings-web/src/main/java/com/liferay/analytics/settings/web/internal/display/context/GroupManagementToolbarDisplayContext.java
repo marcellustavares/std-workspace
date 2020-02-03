@@ -46,7 +46,7 @@ public class GroupManagementToolbarDisplayContext
 		GroupDisplayContext groupDisplayContext) {
 
 		super(
-			liferayPortletRequest, liferayPortletResponse, httpServletRequest,
+			httpServletRequest, liferayPortletRequest, liferayPortletResponse,
 			groupDisplayContext.getGroupSearch());
 
 		_groupDisplayContext = groupDisplayContext;
@@ -88,6 +88,11 @@ public class GroupManagementToolbarDisplayContext
 	@Override
 	public Boolean isSelectable() {
 		return false;
+	}
+
+	@Override
+	protected String[] getDisplayViews() {
+		return new String[] {"list"};
 	}
 
 	@Override

@@ -1,11 +1,6 @@
 Bundle-Name: Liferay Analytics Settings Web
 Bundle-SymbolicName: com.liferay.analytics.settings.web
 Bundle-Version: 1.0.0
-Import-Package:\
-	!org.apache.avalon.*,\
-	!org.apache.log.*,\
-	\
-	*
 Web-ContextPath: /analytics-settings-web
 -dsannotations-options: inherit
 -liferay-aggregate-resource-bundles: com.liferay.portal.settings.lang

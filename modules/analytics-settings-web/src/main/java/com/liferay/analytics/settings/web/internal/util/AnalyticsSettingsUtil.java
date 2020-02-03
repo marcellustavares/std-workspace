@@ -50,8 +50,8 @@ public class AnalyticsSettingsUtil {
 					String.format(
 						"%s/%s", getAsahFaroBackendURL(companyId), path)));
 		}
-		catch (IOException ioe) {
-			throw new PortalException(ioe);
+		catch (IOException ioException) {
+			throw new PortalException(ioException);
 		}
 	}
 
@@ -66,8 +66,8 @@ public class AnalyticsSettingsUtil {
 					String.format(
 						"%s/%s", getAsahFaroBackendURL(companyId), path)));
 		}
-		catch (IOException ioe) {
-			throw new PortalException(ioe);
+		catch (IOException ioException) {
+			throw new PortalException(ioException);
 		}
 	}
 
@@ -118,6 +118,8 @@ public class AnalyticsSettingsUtil {
 		throws IOException {
 
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+
+		httpClientBuilder.useSystemProperties();
 
 		try (CloseableHttpClient closeableHttpClient =
 				httpClientBuilder.build()) {

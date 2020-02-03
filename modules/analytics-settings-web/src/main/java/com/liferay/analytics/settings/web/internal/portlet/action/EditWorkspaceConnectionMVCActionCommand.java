@@ -15,6 +15,7 @@
 package com.liferay.analytics.settings.web.internal.portlet.action;
 
 import com.liferay.analytics.settings.web.internal.util.AnalyticsSettingsUtil;
+import com.liferay.configuration.admin.constants.ConfigurationAdminPortletKeys;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -55,7 +56,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	property = {
-		"javax.portlet.name=com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet",
+		"javax.portlet.name=" + ConfigurationAdminPortletKeys.INSTANCE_SETTINGS,
 		"mvc.command.name=/analytics/edit_workspace_connection"
 	},
 	service = MVCActionCommand.class
@@ -100,6 +101,8 @@ public class EditWorkspaceConnectionMVCActionCommand
 			WebKeys.THEME_DISPLAY);
 
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+
+		httpClientBuilder.useSystemProperties();
 
 		try (CloseableHttpClient closeableHttpClient =
 				httpClientBuilder.build()) {

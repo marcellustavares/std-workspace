@@ -18,21 +18,19 @@ import com.liferay.analytics.settings.configuration.AnalyticsConfiguration;
 import com.liferay.analytics.settings.web.internal.constants.AnalyticsSettingsWebKeys;
 import com.liferay.analytics.settings.web.internal.search.UserGroupChecker;
 import com.liferay.analytics.settings.web.internal.search.UserGroupSearch;
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.model.UserGroup;
-import com.liferay.portal.kernel.search.Sort;
-import com.liferay.portal.kernel.search.SortFactoryUtil;
-import com.liferay.portal.kernel.service.UserGroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.UserGroupServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.users.admin.kernel.util.UsersAdminUtil;
+import com.liferay.portal.kernel.util.comparator.UserGroupNameComparator;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
@@ -82,21 +80,12 @@ public class UserGroupDisplayContext {
 		userGroupSearch.setOrderByCol(_getOrderByCol());
 		userGroupSearch.setOrderByType(getOrderByType());
 
-		Sort sort = SortFactoryUtil.getSort(
-			UserGroup.class, _getOrderByCol(), getOrderByType());
+		List<UserGroup> userGroups = UserGroupServiceUtil.search(
+			_getCompanyId(), _getKeywords(), _getUserGroupParams(),
+			userGroupSearch.getStart(), userGroupSearch.getEnd(),
+			new UserGroupNameComparator(_isOrderByAscending()));
 
-		try {
-			List<UserGroup> userGroups = UsersAdminUtil.getUserGroups(
-				UserGroupLocalServiceUtil.search(
-					_getCompanyId(), _getKeywords(), _getUserGroupParams(),
-					userGroupSearch.getStart(), userGroupSearch.getEnd(),
-					sort));
-
-			userGroupSearch.setResults(userGroups);
-		}
-		catch (PortalException pe) {
-			throw new SystemException(pe);
-		}
+		userGroupSearch.setResults(userGroups);
 
 		userGroupSearch.setRowChecker(
 			new UserGroupChecker(
@@ -104,7 +93,7 @@ public class UserGroupDisplayContext {
 				SetUtil.fromArray(
 					_analyticsConfiguration.syncedUserGroupIds())));
 
-		int total = UserGroupLocalServiceUtil.searchCount(
+		int total = UserGroupServiceUtil.searchCount(
 			_getCompanyId(), _getKeywords(), _getUserGroupParams());
 
 		userGroupSearch.setTotal(total);
@@ -141,11 +130,17 @@ public class UserGroupDisplayContext {
 	}
 
 	private LinkedHashMap<String, Object> _getUserGroupParams() {
-		LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<>();
+		return LinkedHashMapBuilder.<String, Object>put(
+			"active", Boolean.TRUE
+		).build();
+	}
 
-		linkedHashMap.put("active", Boolean.TRUE);
+	private boolean _isOrderByAscending() {
+		if (Objects.equals("asc", getOrderByType())) {
+			return true;
+		}
 
-		return linkedHashMap;
+		return false;
 	}
 
 	private final AnalyticsConfiguration _analyticsConfiguration;

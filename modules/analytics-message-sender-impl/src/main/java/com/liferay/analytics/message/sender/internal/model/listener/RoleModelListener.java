@@ -16,26 +16,27 @@ package com.liferay.analytics.message.sender.internal.model.listener;
 
 import com.liferay.analytics.message.sender.model.EntityModelListener;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
-import com.liferay.portal.kernel.exception.ModelListenerException;
-import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.dao.orm.Property;
+import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.model.ModelListener;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.service.RoleLocalService;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Rachael Koestartyo
+ * @author Shinn Lok
  */
 @Component(
 	immediate = true, service = {EntityModelListener.class, ModelListener.class}
 )
-public class GroupModelListener extends BaseEntityModelListener<Group> {
+public class RoleModelListener extends BaseEntityModelListener<Role> {
 
 	@Override
 	public List<String> getAttributeNames() {
@@ -43,56 +44,58 @@ public class GroupModelListener extends BaseEntityModelListener<Group> {
 	}
 
 	@Override
-	public long[] getMembershipIds(User user) throws Exception {
-		List<Group> groups = user.getSiteGroups();
-
-		Stream<Group> stream = groups.stream();
-
-		return stream.mapToLong(
-			Group::getGroupId
-		).toArray();
+	public long[] getMembershipIds(User user) {
+		return user.getRoleIds();
 	}
 
 	@Override
 	public String getModelClassName() {
-		return Group.class.getName();
-	}
-
-	@Override
-	public void onAfterRemove(Group group) throws ModelListenerException {
-		updateConfigurationProperties(
-			group.getCompanyId(), "syncedGroupIds",
-			String.valueOf(group.getGroupId()), "liferayAnalyticsGroupIds");
+		return Role.class.getName();
 	}
 
 	@Override
 	protected ActionableDynamicQuery getActionableDynamicQuery() {
-		return _groupLocalService.getActionableDynamicQuery();
+		ActionableDynamicQuery actionableDynamicQuery =
+			_roleLocalService.getActionableDynamicQuery();
+
+		actionableDynamicQuery.setAddCriteriaMethod(
+			dynamicQuery -> {
+				Property nameProperty = PropertyFactoryUtil.forName("name");
+
+				dynamicQuery.add(
+					nameProperty.eq(RoleConstants.ANALYTICS_ADMINISTRATOR));
+
+				Property typeProperty = PropertyFactoryUtil.forName("type");
+
+				dynamicQuery.add(typeProperty.eq(RoleConstants.TYPE_REGULAR));
+			});
+
+		return actionableDynamicQuery;
 	}
 
 	@Override
-	protected Group getModel(long id) throws Exception {
-		return _groupLocalService.getGroup(id);
+	protected Role getModel(long id) throws Exception {
+		return _roleLocalService.getRole(id);
 	}
 
 	@Override
 	protected String getPrimaryKeyName() {
-		return "groupId";
+		return "roleId";
 	}
 
 	@Override
-	protected boolean isExcluded(Group group) {
-		if (!group.isSite()) {
-			return true;
+	protected boolean isExcluded(Role role) {
+		if (role.getType() == RoleConstants.TYPE_REGULAR) {
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	private static final List<String> _attributeNames =
 		Collections.singletonList("name");
 
 	@Reference
-	private GroupLocalService _groupLocalService;
+	private RoleLocalService _roleLocalService;
 
 }
