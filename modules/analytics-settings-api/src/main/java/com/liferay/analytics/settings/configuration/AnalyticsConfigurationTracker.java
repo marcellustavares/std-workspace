@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public interface AnalyticsConfigurationTracker {
 
+	public boolean deleteCompanyConfiguration(long companyId);
+
 	public AnalyticsConfiguration getAnalyticsConfiguration(long companyId);
 
 	public AnalyticsConfiguration getAnalyticsConfiguration(String pid);
@@ -32,5 +34,8 @@ public interface AnalyticsConfigurationTracker {
 	public Map<Long, AnalyticsConfiguration> getAnalyticsConfigurations();
 
 	public long getCompanyId(String pid);
+
+	public void saveCompanyConfiguration(
+		long companyId, Dictionary<String, Object> properties);
 
 }

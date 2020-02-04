@@ -30,7 +30,6 @@ import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.search.constants.SearchContextAttributes;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -58,7 +57,7 @@ public class AnalyticsUsersManager {
 							analyticsAdministratorRole.getRoleId(),
 							WorkflowConstants.STATUS_APPROVED);
 				}
-				catch (Exception exception) {
+				catch (Exception e) {
 					if (_log.isDebugEnabled()) {
 						_log.debug(
 							"Unable to get analytics administrators count");
@@ -109,7 +108,7 @@ public class AnalyticsUsersManager {
 				return _userLocalService.getOrganizationUsersCount(
 					organizationId, WorkflowConstants.STATUS_APPROVED);
 			}
-			catch (Exception exception) {
+			catch (Exception e) {
 				if (_log.isDebugEnabled()) {
 					_log.debug("Unable to get organization users count");
 				}
@@ -135,7 +134,7 @@ public class AnalyticsUsersManager {
 				return _userLocalService.getUserGroupUsersCount(
 					userGroupId, WorkflowConstants.STATUS_APPROVED);
 			}
-			catch (Exception exception) {
+			catch (Exception e) {
 				if (_log.isDebugEnabled()) {
 					_log.debug("Unable to get user group users count");
 				}
@@ -158,8 +157,6 @@ public class AnalyticsUsersManager {
 	private SearchContext _createSearchContext() {
 		SearchContext searchContext = new SearchContext();
 
-		searchContext.setAttribute(
-			SearchContextAttributes.ATTRIBUTE_KEY_EMPTY_SEARCH, Boolean.TRUE);
 		searchContext.setEntryClassNames(new String[] {User.class.getName()});
 
 		QueryConfig queryConfig = searchContext.getQueryConfig();

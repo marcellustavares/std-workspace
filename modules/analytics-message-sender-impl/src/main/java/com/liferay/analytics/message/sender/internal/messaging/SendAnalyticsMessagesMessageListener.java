@@ -20,13 +20,7 @@ import com.liferay.analytics.message.sender.constants.AnalyticsMessagesProcessor
 import com.liferay.analytics.message.storage.model.AnalyticsMessage;
 import com.liferay.analytics.message.storage.model.AnalyticsMessageBodyBlobModel;
 import com.liferay.analytics.message.storage.service.AnalyticsMessageLocalService;
-import com.liferay.petra.io.AutoDeleteFileInputStream;
 import com.liferay.petra.io.StreamUtil;
-import com.liferay.petra.io.unsync.UnsyncByteArrayInputStream;
-import com.liferay.portal.kernel.dao.db.DB;
-import com.liferay.portal.kernel.dao.db.DBManagerUtil;
-import com.liferay.portal.kernel.dao.db.DBType;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.messaging.BaseMessageListener;
@@ -40,9 +34,6 @@ import com.liferay.portal.kernel.scheduler.SchedulerEntryImpl;
 import com.liferay.portal.kernel.scheduler.TimeUnit;
 import com.liferay.portal.kernel.scheduler.Trigger;
 import com.liferay.portal.kernel.scheduler.TriggerFactory;
-import com.liferay.portal.kernel.util.File;
-
-import java.io.InputStream;
 
 import java.nio.charset.StandardCharsets;
 
@@ -81,16 +72,6 @@ public class SendAnalyticsMessagesMessageListener extends BaseMessageListener {
 
 		_schedulerEngineHelper.register(
 			this, schedulerEntry, DestinationNames.SCHEDULER_DISPATCH);
-
-		DB db = DBManagerUtil.getDB();
-
-		if ((db.getDBType() != DBType.DB2) &&
-			(db.getDBType() != DBType.MYSQL) &&
-			(db.getDBType() != DBType.MARIADB) &&
-			(db.getDBType() != DBType.SYBASE)) {
-
-			_useTempFile = true;
-		}
 	}
 
 	@Deactivate
@@ -130,32 +111,6 @@ public class SendAnalyticsMessagesMessageListener extends BaseMessageListener {
 		ModuleServiceLifecycle moduleServiceLifecycle) {
 	}
 
-	private InputStream _openBodyInputStream(long analyticsMessageId) {
-		try {
-			AnalyticsMessageBodyBlobModel analyticsMessageBodyBlobModel =
-				_analyticsMessageLocalService.getBodyBlobModel(
-					analyticsMessageId);
-
-			Blob blob = analyticsMessageBodyBlobModel.getBodyBlob();
-
-			if (blob == null) {
-				return _EMPTY_INPUT_STREAM;
-			}
-
-			InputStream inputStream = blob.getBinaryStream();
-
-			if (_useTempFile) {
-				inputStream = new AutoDeleteFileInputStream(
-					_file.createTempFile(inputStream));
-			}
-
-			return inputStream;
-		}
-		catch (Exception e) {
-			throw new SystemException(e);
-		}
-	}
-
 	private void _process(long companyId) throws Exception {
 		while (true) {
 			List<AnalyticsMessage> analyticsMessages =
@@ -169,10 +124,14 @@ public class SendAnalyticsMessagesMessageListener extends BaseMessageListener {
 			JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
 			for (AnalyticsMessage analyticsMessage : analyticsMessages) {
+				AnalyticsMessageBodyBlobModel bodyBlobModel =
+					_analyticsMessageLocalService.getBodyBlobModel(
+						analyticsMessage.getAnalyticsMessageId());
+
+				Blob blob = bodyBlobModel.getBodyBlob();
+
 				String json = new String(
-					StreamUtil.toByteArray(
-						_openBodyInputStream(
-							analyticsMessage.getAnalyticsMessageId())),
+					StreamUtil.toByteArray(blob.getBinaryStream()),
 					StandardCharsets.UTF_8);
 
 				jsonArray.put(JSONFactoryUtil.createJSONObject(json));
@@ -187,9 +146,6 @@ public class SendAnalyticsMessagesMessageListener extends BaseMessageListener {
 
 	private static final int _BATCH_SIZE = 100;
 
-	private static final InputStream _EMPTY_INPUT_STREAM =
-		new UnsyncByteArrayInputStream(new byte[0]);
-
 	@Reference
 	private AnalyticsMessageLocalService _analyticsMessageLocalService;
 
@@ -197,14 +153,9 @@ public class SendAnalyticsMessagesMessageListener extends BaseMessageListener {
 	private AnalyticsMessageSenderClient _analyticsMessageSenderClient;
 
 	@Reference
-	private File _file;
-
-	@Reference
 	private SchedulerEngineHelper _schedulerEngineHelper;
 
 	@Reference
 	private TriggerFactory _triggerFactory;
-
-	private boolean _useTempFile;
 
 }

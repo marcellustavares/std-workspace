@@ -2,3 +2,30 @@
 	cursor: not-allowed;
 	opacity: 0.5;
 }
+.portlet-analytics-settings .list-icon {
+	float: left;
+	padding-right: 20px;
+}
+
+.portlet-analytics-settings .list-icon .lexicon-icon {
+	height: 55px;
+	padding-left: 10px;
+	width: 40px;
+}
+
+.portlet-analytics-settings .padding-16 {
+	padding: 16px;
+}
+
+.portlet-analytics-settings .sync-options {
+	display: inline-block;
+}
+
+.portlet-analytics-settings .table-responsive {
+	padding-left: 24px;
+	padding-top: 16px;
+}
+
+.portlet-analytics-settings .width-25 {
+	width: 25%;
+}

@@ -107,8 +107,7 @@ public class GroupDisplayContext {
 		PortletURL portletURL = _renderResponse.createRenderURL();
 
 		portletURL.setParameter(
-			"mvcRenderCommandName", "/view_configuration_screen");
-		portletURL.setParameter("configurationScreenKey", "synced-sites");
+			"mvcRenderCommandName", "/analytics/edit_synced_sites");
 
 		return portletURL;
 	}

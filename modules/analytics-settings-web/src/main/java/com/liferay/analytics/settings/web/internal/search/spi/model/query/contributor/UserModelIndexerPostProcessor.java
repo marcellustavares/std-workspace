@@ -15,13 +15,17 @@
 package com.liferay.analytics.settings.web.internal.search.spi.model.query.contributor;
 
 import com.liferay.portal.kernel.search.BooleanClauseOccur;
+import com.liferay.portal.kernel.search.BooleanQuery;
+import com.liferay.portal.kernel.search.Document;
+import com.liferay.portal.kernel.search.IndexerPostProcessor;
 import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.search.filter.TermsFilter;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.search.spi.model.query.contributor.ModelPreFilterContributor;
-import com.liferay.portal.search.spi.model.registrar.ModelSearchSettings;
+
+import java.util.Locale;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -31,15 +35,13 @@ import org.osgi.service.component.annotations.Component;
 @Component(
 	immediate = true,
 	property = "indexer.class.name=com.liferay.portal.kernel.model.User",
-	service = ModelPreFilterContributor.class
+	service = IndexerPostProcessor.class
 )
-public class UserModelPreFilterContributor
-	implements ModelPreFilterContributor {
+public class UserModelIndexerPostProcessor implements IndexerPostProcessor {
 
 	@Override
-	public void contribute(
-		BooleanFilter booleanFilter, ModelSearchSettings modelSearchSettings,
-		SearchContext searchContext) {
+	public void postProcessContextBooleanFilter(
+		BooleanFilter booleanFilter, SearchContext searchContext) {
 
 		long[] excludedRoleIds = GetterUtil.getLongValues(
 			searchContext.getAttribute("excludedRoleIds"));
@@ -78,6 +80,41 @@ public class UserModelPreFilterContributor
 		if (innerBooleanFilter.hasClauses()) {
 			booleanFilter.add(innerBooleanFilter, BooleanClauseOccur.MUST);
 		}
+	}
+
+	@Override
+	public void postProcessContextQuery(
+			BooleanQuery contextQuery, SearchContext searchContext)
+		throws Exception {
+	}
+
+	@Override
+	public void postProcessDocument(Document document, Object obj)
+		throws Exception {
+	}
+
+	@Override
+	public void postProcessFullQuery(
+			BooleanQuery fullQuery, SearchContext searchContext)
+		throws Exception {
+	}
+
+	@Override
+	public void postProcessSearchQuery(
+			BooleanQuery searchQuery, BooleanFilter booleanFilter,
+			SearchContext searchContext)
+		throws Exception {
+	}
+
+	@Override
+	public void postProcessSearchQuery(
+			BooleanQuery searchQuery, SearchContext searchContext)
+		throws Exception {
+	}
+
+	@Override
+	public void postProcessSummary(
+		Summary summary, Document document, Locale locale, String snippet) {
 	}
 
 	private TermsFilter _createTermsFilter(String filterName, String[] values) {

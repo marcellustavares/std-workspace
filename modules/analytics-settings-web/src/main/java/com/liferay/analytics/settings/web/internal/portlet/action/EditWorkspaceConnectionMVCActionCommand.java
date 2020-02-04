@@ -14,6 +14,7 @@
 
 package com.liferay.analytics.settings.web.internal.portlet.action;
 
+import com.liferay.analytics.settings.web.internal.constants.AnalyticsSettingsPortletKeys;
 import com.liferay.analytics.settings.web.internal.util.AnalyticsSettingsUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -55,7 +56,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	property = {
-		"javax.portlet.name=com_liferay_configuration_admin_web_portlet_SystemSettingsPortlet",
+		"javax.portlet.name=" + AnalyticsSettingsPortletKeys.ANALYTICS_ADMIN_PORTLET,
 		"mvc.command.name=/analytics/edit_workspace_connection"
 	},
 	service = MVCActionCommand.class
@@ -145,8 +146,8 @@ public class EditWorkspaceConnectionMVCActionCommand
 			return JSONFactoryUtil.createJSONObject(
 				new String(Base64.decode(token)));
 		}
-		catch (Exception exception) {
-			throw new PortalException("Invalid token", exception);
+		catch (Exception e) {
+			throw new PortalException("Invalid token", e);
 		}
 	}
 

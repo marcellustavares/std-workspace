@@ -22,13 +22,15 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  * @author Marcellus Tavares
  */
 @ExtendedObjectClassDefinition(
-	category = "analytics-cloud", generateUI = false,
 	scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
 	id = "com.liferay.analytics.settings.configuration.AnalyticsConfiguration"
 )
 public interface AnalyticsConfiguration {
+
+	@Meta.AD(deflt = "0", required = false)
+	public long companyId();
 
 	@Meta.AD(required = false)
 	public String hostsAllowed();

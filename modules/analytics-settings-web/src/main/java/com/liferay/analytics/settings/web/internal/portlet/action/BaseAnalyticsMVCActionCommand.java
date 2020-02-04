@@ -14,39 +14,30 @@
 
 package com.liferay.analytics.settings.web.internal.portlet.action;
 
-import aQute.bnd.annotation.metatype.Meta;
-
 import com.liferay.analytics.settings.configuration.AnalyticsConfiguration;
-import com.liferay.petra.string.StringPool;
+import com.liferay.analytics.settings.configuration.AnalyticsConfigurationTracker;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.CompanyService;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator;
-import com.liferay.portal.kernel.settings.Settings;
-import com.liferay.portal.kernel.settings.SettingsDescriptor;
 import com.liferay.portal.kernel.settings.SettingsFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.nio.charset.Charset;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Set;
+import java.util.Objects;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.MutableRenderParameters;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -85,8 +76,7 @@ public abstract class BaseAnalyticsMVCActionCommand
 		if (message.equals("INVALID_TOKEN")) {
 			removeCompanyPreferences(companyId);
 
-			configurationProvider.deleteCompanyConfiguration(
-				AnalyticsConfiguration.class, companyId);
+			analyticsConfigurationTracker.deleteCompanyConfiguration(companyId);
 		}
 		else {
 			throw new PortalException("Invalid token");
@@ -109,55 +99,8 @@ public abstract class BaseAnalyticsMVCActionCommand
 		catch (PrincipalException pe) {
 			SessionErrors.add(actionRequest, pe.getClass());
 
-			MutableRenderParameters mutableRenderParameters =
-				actionResponse.getRenderParameters();
-
-			mutableRenderParameters.setValue("mvcPath", "/error.jsp");
+			actionResponse.setRenderParameter("mvcPath", "/error.jsp");
 		}
-	}
-
-	protected String getConfigurationPid() {
-		Class<?> clazz = AnalyticsConfiguration.class;
-
-		Meta.OCD ocd = clazz.getAnnotation(Meta.OCD.class);
-
-		return ocd.id();
-	}
-
-	protected Dictionary<String, Object> getConfigurationProperties(
-			String pid, long scopePK)
-		throws Exception {
-
-		Dictionary<String, Object> configurationProperties = new Hashtable<>();
-
-		Settings settings = settingsFactory.getSettings(
-			new CompanyServiceSettingsLocator(scopePK, pid));
-
-		SettingsDescriptor settingsDescriptor =
-			settingsFactory.getSettingsDescriptor(pid);
-
-		if (settingsDescriptor == null) {
-			return configurationProperties;
-		}
-
-		Set<String> multiValuedKeys = settingsDescriptor.getMultiValuedKeys();
-
-		for (String multiValuedKey : multiValuedKeys) {
-			configurationProperties.put(
-				multiValuedKey,
-				settings.getValues(multiValuedKey, new String[0]));
-		}
-
-		Set<String> keys = settingsDescriptor.getAllKeys();
-
-		keys.removeAll(multiValuedKeys);
-
-		for (String key : keys) {
-			configurationProperties.put(
-				key, settings.getValue(key, StringPool.BLANK));
-		}
-
-		return configurationProperties;
 	}
 
 	protected void removeCompanyPreferences(long companyId) throws Exception {
@@ -178,8 +121,7 @@ public abstract class BaseAnalyticsMVCActionCommand
 
 		configurationProperties.remove("token");
 
-		configurationProvider.deleteCompanyConfiguration(
-			AnalyticsConfiguration.class, companyId);
+		analyticsConfigurationTracker.deleteCompanyConfiguration(companyId);
 	}
 
 	protected void saveCompanyConfiguration(
@@ -187,26 +129,27 @@ public abstract class BaseAnalyticsMVCActionCommand
 		throws Exception {
 
 		Dictionary<String, Object> configurationProperties =
-			getConfigurationProperties(
-				getConfigurationPid(), themeDisplay.getCompanyId());
+			analyticsConfigurationTracker.getAnalyticsConfigurationProperties(
+				themeDisplay.getCompanyId());
 
 		updateConfigurationProperties(actionRequest, configurationProperties);
 
 		try {
 			AnalyticsConfiguration analyticsConfiguration =
-				configurationProvider.getCompanyConfiguration(
-					AnalyticsConfiguration.class, themeDisplay.getCompanyId());
+				analyticsConfigurationTracker.getAnalyticsConfiguration(
+					themeDisplay.getCompanyId());
 
-			if (Validator.isBlank(
-					analyticsConfiguration.liferayAnalyticsDataSourceId()) &&
-				Validator.isBlank(
-					analyticsConfiguration.liferayAnalyticsEndpointURL()) &&
-				Validator.isBlank(analyticsConfiguration.token())) {
+			if (Objects.equals(
+					analyticsConfiguration.liferayAnalyticsDataSourceId(),
+					"") &&
+				Objects.equals(
+					analyticsConfiguration.liferayAnalyticsEndpointURL(), "") &&
+				Objects.equals(analyticsConfiguration.token(), "")) {
 
 				return;
 			}
 		}
-		catch (Exception exception) {
+		catch (Exception e) {
 			if (_log.isInfoEnabled()) {
 				_log.info("Analytics configuration not found");
 			}
@@ -217,9 +160,8 @@ public abstract class BaseAnalyticsMVCActionCommand
 		String token = (String)configurationProperties.get("token");
 
 		if ((token != null) && !token.isEmpty()) {
-			configurationProvider.saveCompanyConfiguration(
-				AnalyticsConfiguration.class, themeDisplay.getCompanyId(),
-				configurationProperties);
+			analyticsConfigurationTracker.saveCompanyConfiguration(
+				themeDisplay.getCompanyId(), configurationProperties);
 		}
 	}
 
@@ -229,10 +171,10 @@ public abstract class BaseAnalyticsMVCActionCommand
 		throws Exception;
 
 	@Reference
-	protected CompanyService companyService;
+	protected AnalyticsConfigurationTracker analyticsConfigurationTracker;
 
 	@Reference
-	protected ConfigurationProvider configurationProvider;
+	protected CompanyService companyService;
 
 	@Reference
 	protected SettingsFactory settingsFactory;

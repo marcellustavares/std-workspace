@@ -12,9 +12,10 @@
  * details.
  */
 
-package com.liferay.analytics.settings.web.internal.portal.settings.configuration.admin.display;
+package com.liferay.analytics.settings.web.internal.portlet.action;
 
-import com.liferay.configuration.admin.display.ConfigurationScreen;
+import com.liferay.analytics.settings.web.internal.constants.AnalyticsSettingsPortletKeys;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 
 import javax.servlet.ServletContext;
 
@@ -22,31 +23,29 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Marcellus Tavares
+ * @author Francisco Dias
  */
-@Component(immediate = true, service = ConfigurationScreen.class)
-public class AnalyticsSyncedContactsConfigurationScreen
-	extends BaseAnalyticsConfigurationScreen {
-
-	@Override
-	public String getKey() {
-		return "synced-contacts";
-	}
+@Component(
+	property = {
+		"javax.portlet.name=" + AnalyticsSettingsPortletKeys.ANALYTICS_ADMIN_PORTLET,
+		"mvc.command.name=/analytics/edit_synced_sites"
+	},
+	service = MVCRenderCommand.class
+)
+public class EditSyncedSitesMVCRenderCommand
+	extends BaseAnalyticsMVCRenderCommand {
 
 	@Override
 	protected String getJspPath() {
-		return "/edit_synced_contacts.jsp";
-	}
-
-	@Override
-	protected ServletContext getServletContext() {
-		return _servletContext;
+		return "/edit_synced_sites.jsp";
 	}
 
 	@Reference(
 		target = "(osgi.web.symbolicname=com.liferay.analytics.settings.web)",
 		unbind = "-"
 	)
-	private ServletContext _servletContext;
+	protected void setServletContext(ServletContext servletContext) {
+		super.servletContext = servletContext;
+	}
 
 }

@@ -12,40 +12,42 @@
  * details.
  */
 
-package com.liferay.analytics.settings.web.internal.portlet.action;
+package com.liferay.analytics.settings.web.internal.application;
 
 import com.liferay.analytics.settings.web.internal.constants.AnalyticsSettingsPortletKeys;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
-
-import javax.servlet.ServletContext;
+import com.liferay.application.list.BasePanelApp;
+import com.liferay.application.list.PanelApp;
+import com.liferay.application.list.constants.PanelCategoryKeys;
+import com.liferay.portal.kernel.model.Portlet;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Francisco Dias
+ * @author Rachael Koestartyo
  */
 @Component(
+	immediate = true,
 	property = {
-		"javax.portlet.name=" + AnalyticsSettingsPortletKeys.ANALYTICS_ADMIN_PORTLET,
-		"mvc.command.name=/analytics_settings/edit_synced_organizations"
+		"panel.app.order:Integer=250",
+		"panel.category.key=" + PanelCategoryKeys.CONTROL_PANEL_CONFIGURATION
 	},
-	service = MVCRenderCommand.class
+	service = PanelApp.class
 )
-public class EditSyncedContactsOrganizationsMVCRenderCommand
-	extends BaseAnalyticsMVCRenderCommand {
+public class AnalyticsSettingsPanelApp extends BasePanelApp {
 
 	@Override
-	protected String getJspPath() {
-		return "/edit_synced_contacts_organizations.jsp";
+	public String getPortletId() {
+		return AnalyticsSettingsPortletKeys.ANALYTICS_ADMIN_PORTLET;
 	}
 
+	@Override
 	@Reference(
-		target = "(osgi.web.symbolicname=com.liferay.analytics.settings.web)",
+		target = "(javax.portlet.name=" + AnalyticsSettingsPortletKeys.ANALYTICS_ADMIN_PORTLET + ")",
 		unbind = "-"
 	)
-	protected void setServletContext(ServletContext servletContext) {
-		super.servletContext = servletContext;
+	public void setPortlet(Portlet portlet) {
+		super.setPortlet(portlet);
 	}
 
 }

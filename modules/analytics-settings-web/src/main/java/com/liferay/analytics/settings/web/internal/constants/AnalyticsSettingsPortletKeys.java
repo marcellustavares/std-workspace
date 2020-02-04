@@ -12,18 +12,14 @@
  * details.
  */
 
-package com.liferay.analytics.message.sender.client;
-
-import aQute.bnd.annotation.ProviderType;
+package com.liferay.analytics.settings.web.internal.constants;
 
 /**
  * @author Rachael Koestartyo
  */
-@ProviderType
-public interface AnalyticsMessageSenderClient {
+public class AnalyticsSettingsPortletKeys {
 
-	public Object send(String body, long companyId) throws Exception;
-
-	public void validateConnection(long companyId) throws Exception;
+	public static final String ANALYTICS_ADMIN_PORTLET =
+		"com_liferay_analytics_settings_web_portlet_AnalyticsAdminPortlet";
 
 }

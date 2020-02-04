@@ -35,7 +35,6 @@ import com.liferay.portal.kernel.model.BaseModelListener;
 import com.liferay.portal.kernel.model.ShardedModel;
 import com.liferay.portal.kernel.model.TreeModel;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.service.CompanyService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -91,7 +90,7 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 				userLocalService.getDefaultUserId(shardedModel.getCompanyId()),
 				analyticsMessageJSON.getBytes(Charset.defaultCharset()));
 		}
-		catch (Exception exception) {
+		catch (Exception e) {
 			if (_log.isInfoEnabled()) {
 				_log.info(
 					"Unable to add analytics message " + jsonObject.toString());
@@ -154,8 +153,8 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 
 			addAnalyticsMessage("update", getAttributeNames(), model);
 		}
-		catch (Exception exception) {
-			throw new ModelListenerException(exception);
+		catch (Exception e) {
+			throw new ModelListenerException(e);
 		}
 	}
 
@@ -209,9 +208,9 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 		try {
 			organizationIds = user.getOrganizationIds();
 		}
-		catch (Exception exception) {
+		catch (Exception e) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(e, e);
 			}
 
 			return true;
@@ -269,7 +268,7 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 			try {
 				companyService.updatePreferences(companyId, unicodeProperties);
 			}
-			catch (Exception exception) {
+			catch (Exception e) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
 						"Unable to update preferences for company ID " +
@@ -281,11 +280,10 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 		configurationProperties.put(configurationPropertyName, modelIds);
 
 		try {
-			configurationProvider.saveCompanyConfiguration(
-				AnalyticsConfiguration.class, companyId,
-				configurationProperties);
+			analyticsConfigurationTracker.saveCompanyConfiguration(
+				companyId, configurationProperties);
 		}
-		catch (Exception exception) {
+		catch (Exception e) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
 					"Unable to update configuration for company ID " +
@@ -302,9 +300,6 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 
 	@Reference
 	protected CompanyService companyService;
-
-	@Reference
-	protected ConfigurationProvider configurationProvider;
 
 	@Reference
 	protected UserLocalService userLocalService;
@@ -359,9 +354,9 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 
 			return _getName(String.valueOf(modelAttributes.get("name")));
 		}
-		catch (Exception exception) {
+		catch (Exception e) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(exception, exception);
+				_log.warn(e, e);
 			}
 
 			return null;
@@ -427,7 +422,7 @@ public abstract class BaseEntityModelListener<T extends BaseModel<T>>
 				companyId, userLocalService.getDefaultUserId(companyId),
 				analyticsMessageJSON.getBytes(Charset.defaultCharset()));
 		}
-		catch (Exception exception) {
+		catch (Exception e) {
 			if (_log.isDebugEnabled()) {
 				_log.debug(
 					StringBundler.concat(

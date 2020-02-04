@@ -24,11 +24,43 @@ portletDisplay.setURLBack(ParamUtil.getString(request, "backURL", redirect));
 
 PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(resourceBundle, "select-contacts"), redirect);
 PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(resourceBundle, "sync-by-organizations"), currentURL);
+
+int cur = ParamUtil.getInteger(request, SearchContainer.DEFAULT_CUR_PARAM);
+int delta = ParamUtil.getInteger(request, SearchContainer.DEFAULT_DELTA_PARAM);
+String entriesNavigation = ParamUtil.getString(request, "entriesNavigation");
+String orderByCol = ParamUtil.getString(request, "orderByCol", "organization-name");
+String orderByType = ParamUtil.getString(request, "orderByType", "asc");
+
+PortletURL navigationPortletURL = renderResponse.createRenderURL();
+
+navigationPortletURL.setParameter("mvcRenderCommandName", "/analytics_settings/edit_synced_organizations");
+navigationPortletURL.setParameter("redirect", redirect);
+
+if (delta > 0) {
+	navigationPortletURL.setParameter("delta", String.valueOf(delta));
+}
+
+PortletURL sortURL = PortletURLUtil.clone(navigationPortletURL, liferayPortletResponse);
+
+sortURL.setParameter("entriesNavigation", entriesNavigation);
+
+navigationPortletURL.setParameter("orderBycol", orderByCol);
+navigationPortletURL.setParameter("orderByType", orderByType);
+
+PortletURL portletURL = PortletURLUtil.clone(navigationPortletURL, liferayPortletResponse);
+
+portletURL.setParameter("entriesNavigation", entriesNavigation);
+
+PortletURL displayStyleURL = PortletURLUtil.clone(portletURL, liferayPortletResponse);
+
+if (cur > 0) {
+	displayStyleURL.setParameter("cur", String.valueOf(cur));
+}
 %>
 
 <portlet:actionURL name="/analytics/edit_synced_contacts" var="editSyncedContactsURL" />
 
-<div class="container-fluid container-fluid-max-xl">
+<div class="container-fluid-1280">
 	<div class="col-12">
 		<div id="breadcrumb">
 			<liferay-ui:breadcrumb
@@ -41,7 +73,7 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(resourceBundle, "
 	</div>
 </div>
 
-<div class="sheet sheet-lg">
+<div class="container-fluid-1280">
 	<h2 class="autofit-row">
 		<span class="autofit-col autofit-col-expand">
 			<liferay-ui:message key="select-contacts-by-organizations" />
@@ -56,13 +88,37 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(resourceBundle, "
 		</span>
 	</div>
 
+	<liferay-frontend:management-bar
+		includeCheckBox="<%= true %>"
+		searchContainerId="selectOrganizations"
+	>
+		<liferay-frontend:management-bar-buttons>
+			<liferay-frontend:management-bar-display-buttons
+				displayViews='<%= new String[] {"list"} %>'
+				portletURL="<%= displayStyleURL %>"
+				selectedDisplayStyle="list"
+			/>
+		</liferay-frontend:management-bar-buttons>
+
+		<liferay-frontend:management-bar-filters>
+			<liferay-frontend:management-bar-navigation
+				navigationKeys='<%= new String[] {"all"} %>'
+				navigationParam="entriesNavigation"
+				portletURL="<%= navigationPortletURL %>"
+			/>
+
+			<liferay-frontend:management-bar-sort
+				orderByCol="<%= orderByCol %>"
+				orderByType="<%= orderByType %>"
+				orderColumns='<%= new String[] {"organization-name"} %>'
+				portletURL="<%= sortURL %>"
+			/>
+		</liferay-frontend:management-bar-filters>
+	</liferay-frontend:management-bar>
+
 	<%
 	OrganizationDisplayContext organizationDisplayContext = new OrganizationDisplayContext(renderRequest, renderResponse);
 	%>
-
-	<clay:management-toolbar
-		displayContext="<%= new OrganizationManagementToolbarDisplayContext(request, liferayPortletRequest, liferayPortletResponse, organizationDisplayContext) %>"
-	/>
 
 	<aui:form action="<%= editSyncedContactsURL %>" method="post" name="fm">
 		<aui:input name="<%= Constants.CMD %>" type="hidden" value="update_synced_organizations" />
@@ -88,7 +144,6 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(resourceBundle, "
 
 			<liferay-ui:search-iterator
 				markupView="lexicon"
-				searchResultCssClass="show-quick-actions-on-hover table table-autofit"
 			/>
 		</liferay-ui:search-container>
 

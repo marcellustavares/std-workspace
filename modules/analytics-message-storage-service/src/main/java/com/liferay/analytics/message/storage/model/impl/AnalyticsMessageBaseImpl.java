@@ -14,8 +14,6 @@
 
 package com.liferay.analytics.message.storage.model.impl;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.analytics.message.storage.model.AnalyticsMessage;
 import com.liferay.analytics.message.storage.service.AnalyticsMessageLocalServiceUtil;
 
@@ -31,7 +29,6 @@ import com.liferay.analytics.message.storage.service.AnalyticsMessageLocalServic
  * @see AnalyticsMessage
  * @generated
  */
-@ProviderType
 public abstract class AnalyticsMessageBaseImpl
 	extends AnalyticsMessageModelImpl implements AnalyticsMessage {
 

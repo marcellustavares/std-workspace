@@ -25,21 +25,76 @@ if (!Validator.isBlank(analyticsConfiguration.token())) {
 	connected = true;
 }
 
+int cur = ParamUtil.getInteger(request, SearchContainer.DEFAULT_CUR_PARAM);
+int delta = ParamUtil.getInteger(request, SearchContainer.DEFAULT_DELTA_PARAM);
+String entriesNavigation = ParamUtil.getString(request, "entriesNavigation");
+String orderByCol = ParamUtil.getString(request, "orderByCol", "site-name");
+String orderByType = ParamUtil.getString(request, "orderByType", "asc");
+
+PortletURL navigationPortletURL = renderResponse.createRenderURL();
+
+navigationPortletURL.setParameter("tabs1", "synced-sites");
+
+if (delta > 0) {
+	navigationPortletURL.setParameter("delta", String.valueOf(delta));
+}
+
+PortletURL sortURL = PortletURLUtil.clone(navigationPortletURL, liferayPortletResponse);
+
+sortURL.setParameter("entriesNavigation", entriesNavigation);
+
+navigationPortletURL.setParameter("orderBycol", orderByCol);
+navigationPortletURL.setParameter("orderByType", orderByType);
+
+PortletURL portletURL = PortletURLUtil.clone(navigationPortletURL, liferayPortletResponse);
+
+portletURL.setParameter("entriesNavigation", entriesNavigation);
+
+PortletURL displayStyleURL = PortletURLUtil.clone(portletURL, liferayPortletResponse);
+
+if (cur > 0) {
+	displayStyleURL.setParameter("cur", String.valueOf(cur));
+}
+
 GroupDisplayContext groupDisplayContext = new GroupDisplayContext(renderRequest, renderResponse);
 %>
 
 <portlet:actionURL name="/analytics/edit_synced_sites" var="editSyncedSitesURL" />
 
-<div class="sheet sheet-lg">
+<div class="container-fluid-1280">
 	<h2 class="autofit-row">
 		<span class="autofit-col autofit-col-expand">
 			<liferay-ui:message key="choose-sites-to-sync" />
 		</span>
 	</h2>
 
-	<clay:management-toolbar
-		displayContext="<%= new GroupManagementToolbarDisplayContext(request, liferayPortletRequest, liferayPortletResponse, groupDisplayContext) %>"
-	/>
+	<liferay-frontend:management-bar
+		includeCheckBox="<%= true %>"
+		searchContainerId="selectGroups"
+	>
+		<liferay-frontend:management-bar-buttons>
+			<liferay-frontend:management-bar-display-buttons
+				displayViews='<%= new String[] {"list"} %>'
+				portletURL="<%= displayStyleURL %>"
+				selectedDisplayStyle="list"
+			/>
+		</liferay-frontend:management-bar-buttons>
+
+		<liferay-frontend:management-bar-filters>
+			<liferay-frontend:management-bar-navigation
+				navigationKeys='<%= new String[] {"all"} %>'
+				navigationParam="entriesNavigation"
+				portletURL="<%= navigationPortletURL %>"
+			/>
+
+			<liferay-frontend:management-bar-sort
+				orderByCol="<%= orderByCol %>"
+				orderByType="<%= orderByType %>"
+				orderColumns='<%= new String[] {"site-name", "site-friendly-url"} %>'
+				portletURL="<%= sortURL %>"
+			/>
+		</liferay-frontend:management-bar-filters>
+	</liferay-frontend:management-bar>
 
 	<aui:form action="<%= editSyncedSitesURL %>" method="post" name="fm">
 		<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
@@ -70,7 +125,6 @@ GroupDisplayContext groupDisplayContext = new GroupDisplayContext(renderRequest,
 
 			<liferay-ui:search-iterator
 				markupView="lexicon"
-				searchResultCssClass="show-quick-actions-on-hover table table-autofit"
 			/>
 		</liferay-ui:search-container>
 

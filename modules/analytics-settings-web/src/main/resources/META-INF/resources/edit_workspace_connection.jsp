@@ -39,28 +39,38 @@ if (analyticsConfiguration != null) {
 	else {
 		String[] syncedOrganizationIds = analyticsConfiguration.syncedOrganizationIds();
 
-		long[] syncedOrganizationIdsLong = new long[syncedOrganizationIds.length];
+		long[] syncedOrganizationIdsLong = new long[0];
 
-		for (int i = 0; i < syncedOrganizationIds.length; i++) {
-			syncedOrganizationIdsLong[i] = GetterUtil.getLong(syncedOrganizationIds[i]);
+		if (!ArrayUtil.isEmpty(syncedOrganizationIds)) {
+			syncedOrganizationIdsLong = new long[syncedOrganizationIds.length];
+
+			for (int i = 0; i < syncedOrganizationIds.length; i++) {
+				syncedOrganizationIdsLong[i] = GetterUtil.getLong(syncedOrganizationIds[i]);
+			}
 		}
 
 		String[] syncedUserGroupIds = analyticsConfiguration.syncedUserGroupIds();
 
-		long[] syncedUserGroupIdsLong = new long[syncedUserGroupIds.length];
+		long[] syncedUserGroupIdsLong = new long[0];
 
-		for (int i = 0; i < syncedUserGroupIds.length; i++) {
-			syncedUserGroupIdsLong[i] = GetterUtil.getLong(syncedUserGroupIds[i]);
+		if (!ArrayUtil.isEmpty(syncedUserGroupIds)) {
+			syncedUserGroupIdsLong = new long[syncedUserGroupIds.length];
+
+			for (int i = 0; i < syncedUserGroupIds.length; i++) {
+				syncedUserGroupIdsLong[i] = GetterUtil.getLong(syncedUserGroupIds[i]);
+			}
 		}
 
 		totalContactsSelected = analyticsUsersManager.getOrganizationsAndUserGroupsUsersCount(syncedOrganizationIdsLong, syncedUserGroupIdsLong);
 	}
 }
+
+PortletURL portletURL = renderResponse.createRenderURL();
 %>
 
 <portlet:actionURL name="/analytics/edit_workspace_connection" var="editWorkspaceConnectionURL" />
 
-<div class="sheet sheet-lg">
+<div class="container-fluid-1280">
 	<c:if test="<%= AnalyticsSettingsUtil.isAnalyticsEnabledWithOAuth(themeDisplay.getCompanyId()) %>">
 		<aui:alert type="warning">
 			<div class="mb-2">
@@ -144,12 +154,14 @@ if (analyticsConfiguration != null) {
 		</small>
 
 		<aui:button-row>
-			<liferay-portlet:renderURL varImpl="selectContactsURL">
-				<portlet:param name="mvcRenderCommandName" value="/view_configuration_screen" />
-				<portlet:param name="configurationScreenKey" value="synced-contacts" />
-			</liferay-portlet:renderURL>
 
-			<aui:button disabled="<%= !connected %>" href="<%= selectContactsURL.toString() %>" primary="<%= true %>" value="select-contacts" />
+			<%
+			PortletURL syncedContactsURL = PortletURLUtil.clone(portletURL, renderResponse);
+
+			syncedContactsURL.setParameter("tabs1", "synced-contacts");
+			%>
+
+			<aui:button disabled="<%= !connected %>" href="<%= syncedContactsURL.toString() %>" primary="<%= true %>" value="select-contacts" />
 		</aui:button-row>
 	</aui:fieldset>
 
@@ -169,12 +181,14 @@ if (analyticsConfiguration != null) {
 		</small>
 
 		<aui:button-row>
-			<liferay-portlet:renderURL varImpl="selectSitesURL">
-				<portlet:param name="mvcRenderCommandName" value="/view_configuration_screen" />
-				<portlet:param name="configurationScreenKey" value="synced-sites" />
-			</liferay-portlet:renderURL>
 
-			<aui:button disabled="<%= !connected %>" href="<%= selectSitesURL.toString() %>" primary="<%= true %>" value="select-sites" />
+			<%
+			PortletURL syncedSitesURL = PortletURLUtil.clone(portletURL, renderResponse);
+
+			syncedSitesURL.setParameter("tabs1", "synced-sites");
+			%>
+
+			<aui:button disabled="<%= !connected %>" href="<%= syncedSitesURL.toString() %>" primary="<%= true %>" value="select-sites" />
 		</aui:button-row>
 	</aui:fieldset>
 </div>

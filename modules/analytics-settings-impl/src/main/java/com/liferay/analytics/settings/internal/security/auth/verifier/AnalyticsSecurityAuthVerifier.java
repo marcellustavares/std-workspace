@@ -26,7 +26,7 @@ import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.security.auth.AuthException;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifier;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifierResult;
-import com.liferay.portal.kernel.security.service.access.policy.ServiceAccessPolicy;
+import com.liferay.portal.kernel.security.service.access.policy.ServiceAccessPolicyThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -39,8 +39,6 @@ import java.security.KeyFactory;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -139,14 +137,7 @@ public class AnalyticsSecurityAuthVerifier implements AuthVerifier {
 				return authVerifierResult;
 			}
 
-			Map<String, Object> settings = authVerifierResult.getSettings();
-
-			List<String> serviceAccessPolicyNames =
-				(List<String>)settings.computeIfAbsent(
-					ServiceAccessPolicy.SERVICE_ACCESS_POLICY_NAMES,
-					value -> new ArrayList<>());
-
-			serviceAccessPolicyNames.add(
+			ServiceAccessPolicyThreadLocal.addActiveServiceAccessPolicyName(
 				AnalyticsSecurityConstants.SERVICE_ACCESS_POLICY_NAME);
 
 			authVerifierResult.setState(AuthVerifierResult.State.SUCCESS);
@@ -156,8 +147,8 @@ public class AnalyticsSecurityAuthVerifier implements AuthVerifier {
 
 			return authVerifierResult;
 		}
-		catch (Exception exception) {
-			throw new AuthException(exception);
+		catch (Exception e) {
+			throw new AuthException(e);
 		}
 	}
 
