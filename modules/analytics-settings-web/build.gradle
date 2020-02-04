@@ -3,7 +3,7 @@ dependencies {
 	compileInclude group: "org.apache.httpcomponents", name: "httpcore", version: "4.4.6"
 
 	compileOnly group: "com.liferay", name: "biz.aQute.bnd.annotation", version: "4.2.0.LIFERAY-PATCHED-1"
-	compileOnly group: "com.liferay", name: "com.liferay.configuration.admin.api"
+	compileOnly group: "com.liferay", name: "com.liferay.application.list.api"
 	compileOnly group: "com.liferay", name: "com.liferay.frontend.taglib"
 	compileOnly group: "com.liferay", name: "com.liferay.frontend.taglib.clay"
 	compileOnly group: "com.liferay", name: "com.liferay.frontend.taglib.soy"
