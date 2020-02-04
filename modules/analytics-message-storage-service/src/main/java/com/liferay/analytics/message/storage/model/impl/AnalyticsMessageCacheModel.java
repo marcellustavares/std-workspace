@@ -14,6 +14,8 @@
 
 package com.liferay.analytics.message.storage.model.impl;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.analytics.message.storage.model.AnalyticsMessage;
 import com.liferay.portal.kernel.model.CacheModel;
 import com.liferay.portal.kernel.model.MVCCModel;
@@ -33,6 +35,7 @@ import java.util.Date;
  * @author Brian Wing Shun Chan
  * @generated
  */
+@ProviderType
 public class AnalyticsMessageCacheModel
 	implements CacheModel<AnalyticsMessage>, Externalizable, MVCCModel {
 
